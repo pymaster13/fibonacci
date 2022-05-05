@@ -2,16 +2,62 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.authtoken.models import Token as ResetPasswordToken
 
 from .exceptions import (EmailValidationError, LoginUserError,
                          TgAccountVerifyError, InviterUserError,
-                         UserWithTgExistsError)
+                         UserWithTgExistsError, UserDoesNotExists,
+                         TokenDoesNotExists)
 
 from .models import TgAccount
 
 
 User = get_user_model()
+
+
+class ResetPasswordTokenSerializer(serializers.Serializer):
+    """Serializer for checking token during change endpoint."""
+
+    token = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Токен не может быть пустым.",
+                            'required': "Отсутствует поле с токеном."
+                            })
+
+    def validate_token(self, token):
+        try:
+            token = ResetPasswordToken.objects.get(key=token)
+        except Exception:
+            raise TokenDoesNotExists(
+                'Несуществующая ссылка для восстановления пароля.'
+                )
+        return token
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for changing password."""
+
+    email = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Электронная почта не может быть пустой.",
+                            'required': "Поле электронной почты отсутствует.",
+                            })
+    password = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Пароль не может быть пустым.",
+                            'required': "Отсутствует поле с паролем."
+                            })
+
+    def validate(self, attrs):
+        try:
+            validate_email(attrs['email'])
+        except ValidationError:
+            raise EmailValidationError('Введите корректную электронную почту.')
+        return attrs
+
 
 
 class TgAccountSerializer(serializers.Serializer):
@@ -186,11 +232,38 @@ class LoginUserSerializer(serializers.Serializer):
         try:
             validate_email(attrs['email'])
         except ValidationError:
-            raise LoginUserError('Введите корректный почтовый ящик.')
+            raise EmailValidationError('Введите корректный почтовый ящик.')
         else:
             user = authenticate(**attrs)
             if user and user.is_active:
                 return user
             raise LoginUserError(
                 "Проверьте корректность введенных данных."
+                )
+
+class PasswordResetSerializer(serializers.Serializer):
+    """Serializer for reseting user password.
+        Params:
+            email: str,
+        Returns:
+            email object
+    """
+    email = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Введите электронную почту.",
+                            'required': "Поле электронной почты отсутствует.",
+                            })
+
+    def validate_email(self, email):
+        try:
+            validate_email(email)
+        except ValidationError:
+            raise EmailValidationError('Введите корректный почтовый ящик.')
+
+        try:
+            return User.objects.get(email=email)
+        except Exception:
+            raise UserDoesNotExists(
+                'Пользователя с такой электронной почтой не существует.'
                 )

@@ -3,11 +3,12 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, Group, Permission
+from django.core.mail import send_mail  
 from django.core.validators import EmailValidator
 from django.db import models
 
 from .managers import UserManager
-
+from config.settings import EMAIL_HOST_USER
 
 class TgAccount(models.Model):
     """Telegram account for confirming account during registration"""

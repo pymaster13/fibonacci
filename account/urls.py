@@ -2,7 +2,8 @@ from django.urls import path
 from knox.views import LogoutView
 
 from .views import (GetTgCodeView, RegisterUserView, LoginUserView,
-                    ConfirmTgAccountView)
+                    ConfirmTgAccountView, ResetPasswordView,
+                    CheckResetTokenView, ChangeUserPasswordView)
 
 
 urlpatterns = [
@@ -11,4 +12,7 @@ urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
     path('login/', LoginUserView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('reset_password_confirm/', CheckResetTokenView.as_view(), name='reset_password_confirm'),
+    path('reset_password/', ResetPasswordView.as_view(), name='reset_password'),
+    path('change_password/', ChangeUserPasswordView.as_view(), name='change_password'),
 ]

@@ -33,9 +33,19 @@ class InviterUserError(AccountError):
         super().__init__(error)
 
 
-
-
 class LoginUserError(AccountError):
+    def __init__(self, error) -> None:
+        self.error = error
+        super().__init__(error)
+
+
+class UserDoesNotExists(AccountError):
+    def __init__(self, error) -> None:
+        self.error = error
+        super().__init__(error)
+
+
+class TokenDoesNotExists(AccountError):
     def __init__(self, error) -> None:
         self.error = error
         super().__init__(error)
