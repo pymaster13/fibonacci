@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from rest_framework.authtoken.models import Token as ResetPasswordToken
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
                                    HTTP_200_OK)
-from rest_framework.generics import (GenericAPIView, UpdateAPIView)
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from knox.models import AuthToken
 
@@ -17,8 +16,7 @@ from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           TgAccountSerializer, TgAccountCodeSerializer,
                           PasswordResetSerializer, ChangePasswordSerializer,
                           ResetPasswordTokenSerializer)
-from .services import generate_code, check_code_time
-from config.settings import EMAIL_HOST_USER
+from .services import generate_code, check_code_time, send_mail_message
 
 
 User = get_user_model()
@@ -157,7 +155,6 @@ class LoginUserView(GenericAPIView):
         try:
             serializer.is_valid(raise_exception=True)
         except (LoginUserError, EmailValidationError) as e:
-            print(e)
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         user = serializer.validated_data
@@ -188,15 +185,7 @@ class ResetPasswordView(GenericAPIView):
             existed_tokens.delete()
 
         token = ResetPasswordToken.objects.create(user=user)
-
-        head = "Восстановление пароля"
-        ref = f"localhost:3000/password_reset?token={token.key}/"
-        body = f"Для восстановления пароля перейдите по следующей ссылке: {ref}" 
-        from_mail = EMAIL_HOST_USER
-        to_mail = [token.user.email]
-
-        # Message in terminal
-        send_mail(head, body, from_mail, to_mail)
+        send_mail_message(token)
 
         return Response({
             "email": token.user.email,
@@ -225,7 +214,7 @@ class CheckResetTokenView(GenericAPIView):
 
         token.delete()
 
-        return Response({'email':email}, status=HTTP_200_OK)
+        return Response({'email': email}, status=HTTP_200_OK)
 
 
 class ChangeUserPasswordView(GenericAPIView):

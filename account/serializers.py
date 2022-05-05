@@ -61,12 +61,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class TgAccountSerializer(serializers.Serializer):
-    """Serializer for user authentication.
-        Params:
-            tg_nickname: str
-        Returns:
-            tg_nickname: str
-    """
+    """Serializer for user authentication."""
+
     tg_nickname = serializers.CharField(
                         required=True,
                         error_messages={
@@ -75,14 +71,8 @@ class TgAccountSerializer(serializers.Serializer):
 
 
 class TgAccountCodeSerializer(serializers.Serializer):
-    """Serializer for user authentication.
-        Params:
-            tg_nickname: str,
-            code: str
-        Returns:
-            tg_nickname: str,
-            code: str
-    """
+    """Serializer for user authentication."""
+
     tg_nickname = serializers.CharField(
                         required=True,
                         error_messages={
@@ -98,17 +88,7 @@ class TgAccountCodeSerializer(serializers.Serializer):
 
 
 class RegisterUserSerializer(serializers.Serializer):
-    """Serializer for register of user.
-        Params:
-            email: str,
-            tg_nickname: str,
-            first_name: str,
-            last_name: str,
-            password: str,
-            inviter: str
-        Returns:
-            User object
-    """
+    """Serializer for register of user."""
 
     email = serializers.CharField(
                         required=True,
@@ -208,13 +188,8 @@ class RegisterUserSerializer(serializers.Serializer):
 
 
 class LoginUserSerializer(serializers.Serializer):
-    """Serializer for user authentication.
-        Params:
-            email: str,
-            password: str.
-        Returns:
-            User object
-    """
+    """Serializer for user authentication."""
+
     email = serializers.CharField(
                         required=True,
                         error_messages={
@@ -242,12 +217,8 @@ class LoginUserSerializer(serializers.Serializer):
                 )
 
 class PasswordResetSerializer(serializers.Serializer):
-    """Serializer for reseting user password.
-        Params:
-            email: str,
-        Returns:
-            email object
-    """
+    """Serializer for reseting user password."""
+
     email = serializers.CharField(
                         required=True,
                         error_messages={

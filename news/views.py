@@ -6,7 +6,7 @@ from rest_framework.status import (HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN,
 from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
                                      UpdateAPIView, DestroyAPIView,
                                      ListAPIView)
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import News
@@ -23,7 +23,6 @@ class NewsRetrieveView(RetrieveAPIView):
     serializer_class = NewsDetailSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = 'pk'
-
 
 
 class NewsListView(ListAPIView):
@@ -48,7 +47,7 @@ class NewsCreateView(CreateAPIView):
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, 
+            return Response(serializer.data,
                             status=HTTP_201_CREATED,
                             headers=headers)
         return Response({

@@ -11,12 +11,8 @@ User = get_user_model()
 
 
 class MetamaskWalletSerializer(serializers.Serializer):
-    """Serializer for metamask.
-        Params:
-            wallet_address: str
-        Returns:
-            wallet_address: str
-    """
+    """Serializer for metamask."""
+
     wallet_address = serializers.CharField(
                             required=True,
                             error_messages={
@@ -34,4 +30,3 @@ class MetamaskWalletSerializer(serializers.Serializer):
                     'Такой кошелек уже привязан к аккаунту.'
                     )
         return wallet_address
-

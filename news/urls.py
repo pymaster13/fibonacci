@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import (NewsRetrieveView, NewsUpdateView, 
+from .views import (NewsRetrieveView, NewsUpdateView,
                     NewsDeleteView, NewsCreateView,
                     NewsListView)
 

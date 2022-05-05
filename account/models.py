@@ -10,6 +10,7 @@ from django.db import models
 from .managers import UserManager
 from config.settings import EMAIL_HOST_USER
 
+
 class TgAccount(models.Model):
     """Telegram account for confirming account during registration"""
 
