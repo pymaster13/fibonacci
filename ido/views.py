@@ -8,40 +8,40 @@ from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import News
-from .serializers import NewsDetailSerializer
-
+from .models import IDO, UserOutOrder, ManuallyCharge
+from .serializers import (IDOSerializer, UserOutOrderSerializer,
+                          ManuallyCharge)
 
 User = get_user_model()
 
 
-class NewsRetrieveView(RetrieveAPIView):
-    """API endpoint for retrieving news."""
+class IDORetrieveView(RetrieveAPIView):
+    """API endpoint for retrieving IDOs."""
 
-    queryset = News.objects.all()
-    serializer_class = NewsDetailSerializer
+    queryset = IDO.objects.all()
+    serializer_class = IDOSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = 'pk'
 
 
-class NewsListView(ListAPIView):
-    """API endpoint for showing all news."""
+class IDOListView(ListAPIView):
+    """API endpoint for showing all IDOs."""
 
-    queryset = News.objects.all()
-    serializer_class = NewsDetailSerializer
+    queryset = IDO.objects.all()
+    serializer_class = IDOSerializer
     permission_classes = (IsAuthenticated,)
 
 
-class NewsCreateView(CreateAPIView):
-    """API endpoint for creating news."""
+class IDOCreateView(CreateAPIView):
+    """API endpoint for creating IDO."""
 
-    queryset = News.objects.all()
-    serializer_class = NewsDetailSerializer
+    queryset = IDO.objects.all()
+    serializer_class = IDOSerializer
     permission_classes = (IsAuthenticated,)
 
     def create(self, request):
         user = User.objects.get(email=request.user)
-        if user.has_perm('news.add_news') or user.is_superuser:
+        if user.has_perm('ido.add_ido') or user.is_superuser:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
@@ -50,21 +50,21 @@ class NewsCreateView(CreateAPIView):
                             status=HTTP_201_CREATED,
                             headers=headers)
         return Response({
-                "error": 'У пользователя нет прав на создание новостей.'
+                "error": 'У пользователя нет прав на создание IDO.'
                 }, status=HTTP_403_FORBIDDEN)
 
 
-class NewsUpdateView(UpdateAPIView):
-    """API endpoint for updating news."""
+class IDOUpdateView(UpdateAPIView):
+    """API endpoint for updating IDO."""
 
     permission_classes = (IsAuthenticated,)
-    queryset = News.objects.all()
-    serializer_class = NewsDetailSerializer
+    queryset = IDO.objects.all()
+    serializer_class = IDOSerializer
     lookup_field = 'pk'
 
     def update(self, request, **kwargs):
         user = User.objects.get(email=request.user)
-        if user.has_perm('news.change_news') or user.is_superuser:
+        if user.has_perm('ido.change_ido') or user.is_superuser:
             partial = kwargs.pop('partial', False)
             instance = self.get_object()
             serializer = self.get_serializer(
@@ -80,25 +80,25 @@ class NewsUpdateView(UpdateAPIView):
             return Response(serializer.data)
 
         return Response({
-                "error": 'У пользователя нет прав на изменение новостей.'
+                "error": 'У пользователя нет прав на изменение IDO.'
                 }, status=HTTP_403_FORBIDDEN)
 
 
-class NewsDeleteView(DestroyAPIView):
-    """API endpoint for deleting news."""
+class IDODeleteView(DestroyAPIView):
+    """API endpoint for deleting IDO."""
 
     permission_classes = (IsAuthenticated,)
-    queryset = News.objects.all()
-    serializer_class = NewsDetailSerializer
+    queryset = IDO.objects.all()
+    serializer_class = IDOSerializer
     lookup_field = 'pk'
 
     def destroy(self, request, *args, **kwargs):
         user = User.objects.get(email=request.user)
-        if user.has_perm('news.delete_news') or user.is_superuser:
+        if user.has_perm('ido.delete_ido') or user.is_superuser:
             instance = self.get_object()
             self.perform_destroy(instance)
             return Response(status=HTTP_204_NO_CONTENT)
 
         return Response({
-                "error": 'У пользователя нет прав на удаление новостей.'
+                "error": 'У пользователя нет прав на удаление IDO.'
                 }, status=HTTP_403_FORBIDDEN)
