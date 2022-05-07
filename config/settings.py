@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'knox',
-    'drf_spectacular', # Swagger UI
+    'drf_spectacular',  # Swagger UI
 
     'account',
     'core',
@@ -96,7 +96,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'knox.auth.TokenAuthentication',
+        ),
     'DATETIME_FORMAT': '%d.%m.%Y %H:%M',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 1,
@@ -107,7 +109,8 @@ AUTH_USER_MODEL = "account.User"
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
@@ -128,3 +131,5 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+
+COINMARKETCAP_API_KEY = os.getenv("COINMARKETCAP_API_KEY")

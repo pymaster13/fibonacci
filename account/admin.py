@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import TgAccount, TgCode
+from .models import TgAccount, TgCode, GoogleAuth
 
 
 User = get_user_model()
@@ -42,3 +42,8 @@ class TgAccountAdmin(admin.ModelAdmin):
 @admin.register(TgCode)
 class TgCodeAdmin(admin.ModelAdmin):
     list_display = ('tg_account', 'code', 'created')
+
+
+@admin.register(GoogleAuth)
+class GoogleAuthAdmin(admin.ModelAdmin):
+    list_display = ('user', 'token', 'is_installed')

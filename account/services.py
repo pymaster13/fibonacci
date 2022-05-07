@@ -1,6 +1,11 @@
-﻿from datetime import datetime as dt, timezone
+﻿import base64
+import io
+from datetime import datetime as dt, timezone
 from random import randint
+
 from django.core.mail import send_mail
+import pyotp
+from qrcode import QRCode, constants
 
 from .models import TgCode
 from config.settings import EMAIL_HOST_USER
@@ -37,3 +42,39 @@ def send_mail_message(token_obj):
 
     # Message in terminal
     send_mail(head, body, from_mail, to_mail)
+
+
+def generate_google_qrcode(token, email):
+    """Help function for generating code Google Authenticator."""
+    data = pyotp.totp.TOTP(token).provisioning_uri(
+                                                name=email,
+                                                issuer_name='Fibonacci'
+                                                )
+    qr = QRCode(error_correction=constants.ERROR_CORRECT_L,
+                version=1,
+                box_size=6,
+                border=4)
+    try:
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image()
+
+        byte_in = io.BytesIO()
+        img.save(byte_in, format='PNG')
+        byte_out = byte_in.getvalue()
+        enc_bytes = base64.b64encode(byte_out)
+
+        return str(enc_bytes)[2:-1]
+
+    except Exception as e:
+        print(e)
+        return
+
+
+def verify_google_code(token, code):
+    """Help function to verify code Google Authenticator."""
+    t = pyotp.TOTP(token)
+    print(token, code)
+    print(t.now())
+    result = t.verify(code)
+    return result if result is True else False

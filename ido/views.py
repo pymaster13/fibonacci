@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from .models import IDO, UserOutOrder, ManuallyCharge
 from .serializers import (IDOSerializer, UserOutOrderSerializer,
                           ManuallyCharge)
+from .services import process_ido_data
 
 User = get_user_model()
 
@@ -42,7 +43,10 @@ class IDOCreateView(CreateAPIView):
     def create(self, request):
         user = User.objects.get(email=request.user)
         if user.has_perm('ido.add_ido') or user.is_superuser:
-            serializer = self.get_serializer(data=request.data)
+
+            data = process_ido_data(request.data)
+
+            serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
@@ -67,9 +71,10 @@ class IDOUpdateView(UpdateAPIView):
         if user.has_perm('ido.change_ido') or user.is_superuser:
             partial = kwargs.pop('partial', False)
             instance = self.get_object()
+            data = process_ido_data(request.data)
             serializer = self.get_serializer(
                 instance,
-                data=request.data,
+                data=data,
                 partial=partial)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)

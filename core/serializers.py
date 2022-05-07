@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework import serializers
 
+from core.models import Address
 from .exceptions import MetamaskWalletExistsError
-from .models import MetamaskWallet
 
 
 User = get_user_model()
@@ -22,11 +22,11 @@ class MetamaskWalletSerializer(serializers.Serializer):
 
     def validate_wallet_address(self, wallet_address):
         try:
-            address = MetamaskWallet.objects.get(wallet_address=wallet_address)
+            address = Address.objects.get(address=wallet_address)
         except ObjectDoesNotExist:
             address = None
         if address:
             raise MetamaskWalletExistsError(
-                    'Такой кошелек уже привязан к аккаунту.'
+                    'Такой кошелек уже привязан.'
                     )
         return wallet_address

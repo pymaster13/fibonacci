@@ -15,8 +15,8 @@ class TgAccount(models.Model):
     """Telegram account for confirming account during registration"""
 
     tg_nickname = models.CharField(max_length=128,
-                                         unique=True,
-                                         verbose_name='Telegram nickname')
+                                   unique=True,
+                                   verbose_name='Telegram nickname')
     is_confirmed = models.BooleanField(default=False,
                                        verbose_name='Confirmed')
 
@@ -31,6 +31,7 @@ class TgCode(models.Model):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Overriding django user model."""
+
     email = models.CharField(max_length=128,
                              unique=True,
                              verbose_name='Email',
@@ -63,8 +64,24 @@ class User(AbstractBaseUser, PermissionsMixin):
     inviter = models.OneToOneField('self',
                                    on_delete=models.SET_NULL,
                                    blank=True, null=True)
+    balance = models.FloatField(default=0.0)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+
+class GoogleAuth(models.Model):
+    """Model Google 2fa."""
+
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             verbose_name="User")
+    token = models.CharField(max_length=255, verbose_name="Secret key")
+    is_installed = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "google_auth"
+        verbose_name = "Google Verification"
+        verbose_name_plural = verbose_name

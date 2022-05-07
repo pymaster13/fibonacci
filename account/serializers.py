@@ -59,7 +59,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
-
 class TgAccountSerializer(serializers.Serializer):
     """Serializer for user authentication."""
 
@@ -212,11 +211,13 @@ class LoginUserSerializer(serializers.Serializer):
             user = authenticate(**attrs)
             if user and user.is_active:
                 return user
+
             raise LoginUserError(
                 "Проверьте корректность введенных данных."
                 )
 
-class PasswordResetSerializer(serializers.Serializer):
+
+class EmailSerializer(serializers.Serializer):
     """Serializer for reseting user password."""
 
     email = serializers.CharField(
@@ -237,4 +238,50 @@ class PasswordResetSerializer(serializers.Serializer):
         except Exception:
             raise UserDoesNotExists(
                 'Пользователя с такой электронной почтой не существует.'
+                )
+
+
+class GoogleCodeSerializer(serializers.Serializer):
+    """Serializer for Google Authenticator code."""
+
+    code = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Код не может быть пустым."
+                            })
+
+
+class LoginAdminSerializer(serializers.Serializer):
+    """Serializer for admin authentication."""
+
+    email = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Введите электронную почту.",
+                            'required': "Поле электронной почты отсутствует.",
+                            })
+    password = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Введите пароль.",
+                            'required': "Поле с паролем пользователя отсутствует.",
+                            })
+    code = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Код не может быть пустым."
+                            })
+
+    def validate(self, attrs):
+        try:
+            validate_email(attrs['email'])
+        except ValidationError:
+            raise EmailValidationError('Введите корректный почтовый ящик.')
+        else:
+            admin = authenticate(**attrs)
+            if admin and admin.is_active and admin.is_superuser:
+                return admin, attrs['code']
+
+            raise LoginUserError(
+                "Проверьте корректность введенных данных."
                 )

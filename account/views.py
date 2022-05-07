@@ -3,20 +3,24 @@ from rest_framework.authtoken.models import Token as ResetPasswordToken
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
                                    HTTP_200_OK)
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from knox.models import AuthToken
+import pyotp
 
 from .exceptions import (LoginUserError, EmailValidationError,
                          TgAccountVerifyError, InviterUserError,
                          UserWithTgExistsError, UserDoesNotExists,
                          TokenDoesNotExists)
-from .models import TgAccount, TgCode
+from .models import TgAccount, TgCode, GoogleAuth
 from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           TgAccountSerializer, TgAccountCodeSerializer,
-                          PasswordResetSerializer, ChangePasswordSerializer,
-                          ResetPasswordTokenSerializer)
-from .services import generate_code, check_code_time, send_mail_message
+                          EmailSerializer, ChangePasswordSerializer,
+                          ResetPasswordTokenSerializer,
+                          GoogleCodeSerializer, LoginAdminSerializer)
+from .services import (generate_code, check_code_time,
+                       verify_google_code, send_mail_message,
+                       generate_google_qrcode)
 
 
 User = get_user_model()
@@ -158,17 +162,23 @@ class LoginUserView(GenericAPIView):
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         user = serializer.validated_data
+
+        if not user.is_superuser:
+            return Response({
+                "id": user.id,
+                "email": user.email,
+                "token": AuthToken.objects.create(user)[1]
+            })
+
         return Response({
-            "id": user.id,
-            "email": user.email,
-            "token": AuthToken.objects.create(user)[1]
-        })
+                "status": "superuser"
+            })
 
 
 class ResetPasswordView(GenericAPIView):
     """API endpoint to reset user password."""
 
-    serializer_class = PasswordResetSerializer
+    serializer_class = EmailSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -238,4 +248,87 @@ class ChangeUserPasswordView(GenericAPIView):
             "id": user.id,
             "email": user.email,
             "status": "Пароль успешно восстановлен."
+        })
+
+
+class GenerateGoogleQRView(GenericAPIView):
+    """API endpoint for generating Google Authenticator QR-code."""
+
+    serializer_class = EmailSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except EmailValidationError as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        user = User.objects.get(email=serializer.validated_data['email'])
+
+        existed_objects = GoogleAuth.objects.filter(user=user)
+        existed_objects.delete()
+        token = pyotp.random_base32()
+
+        google_auth = GoogleAuth.objects.create(user=user, token=token)
+        qrcode = generate_google_qrcode(google_auth.token, user.email)
+        if not qrcode:
+            return Response(
+                {"error": "Ошибка генерации QR-кода гугл-аутентификации."}
+                )
+        return Response({'qr-code': qrcode})
+
+
+class VerifyGoogleCodeView(GenericAPIView):
+    """API endpoint to verify Google Authenticator code."""
+
+    serializer_class = GoogleCodeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.get(email=request.user)
+
+        google_auth = GoogleAuth.objects.get(user=user)
+        result = verify_google_code(google_auth.token,
+                                    serializer.validated_data['code'])
+        if not result:
+            return Response({"error": "Введите корректный код."})
+
+        google_auth.is_installed = True
+        google_auth.save()
+
+        return Response({'status': 'success'})
+
+
+class LoginAdminUserView(GenericAPIView):
+    """API endpoint for admin authentication."""
+
+    serializer_class = LoginAdminSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (LoginUserError, EmailValidationError) as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        admin, code = serializer.validated_data
+
+        google_auth = GoogleAuth.objects.get(user=admin)
+        result = verify_google_code(google_auth.token, code)
+        if not result:
+            return Response({"error": "Введите корректный код."})
+
+        google_auth.is_installed = True
+        google_auth.save()
+
+        return Response({
+            "id": admin.id,
+            "email": admin.email,
+            "token": AuthToken.objects.create(admin)[1]
         })

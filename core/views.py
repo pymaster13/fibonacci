@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from knox.models import AuthToken
 
+from core.models import Address
 from .exceptions import MetamaskWalletExistsError
 from .models import MetamaskWallet
 from .serializers import MetamaskWalletSerializer
@@ -30,8 +31,11 @@ class AddMetamaskWalletView(GenericAPIView):
 
         try:
             user = User.objects.get(email=request.user)
+            wallet_address = serializer.validated_data['wallet_address']
+
+            address = Address.objects.create(address=wallet_address)
             metamask, _ = MetamaskWallet.objects.get_or_create(user=user)
-            metamask.wallet_address = serializer.validated_data['wallet_address']
+            metamask.wallet_address = address
             metamask.save()
 
             return Response({'binded': True})
