@@ -136,6 +136,13 @@ class RegisterUserView(GenericAPIView):
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
+        if user.inviter:
+            user.line = user.inviter.line + 1
+            user.save()
+
+            if user.inviter.status != 'A':
+                user.inviter.status = 'A'
+                user.inviter.save()
 
         return Response({
             "id": user.id,

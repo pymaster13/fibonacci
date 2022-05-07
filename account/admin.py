@@ -13,8 +13,9 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = (
         ('Personal info', {'fields': ('email', 'telegram',
                                       'first_name', 'last_name', 'inviter',
-                                      'is_active', 'is_superuser',
-                                      'can_invite', 'is_staff')}),
+                                      'line', 'is_active', 'status',
+                                      'is_superuser', 'can_invite',
+                                      'is_staff')}),
         ('Password info', {'fields': ('password',)}),
         ('Groups, permissions', {
             'fields': ('groups', 'user_permissions'),
@@ -28,10 +29,11 @@ class UserAdmin(DjangoUserAdmin):
         }),
         )
 
-    list_display = ('email', 'telegram', 'first_name', 'last_name',
-                    'is_active', 'is_staff', 'invite_code', 'can_invite')
+    list_display = ('email', 'telegram', 'first_name', 'last_name', 'line',
+                    'is_active', 'is_staff', 'invite_code', 'can_invite',
+                    'status')
     search_fields = ('email', 'telegram')
-    ordering = ('email', 'telegram')
+    ordering = ('email', 'line', 'telegram')
 
 
 @admin.register(TgAccount)

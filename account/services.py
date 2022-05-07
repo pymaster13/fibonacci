@@ -3,7 +3,7 @@ import io
 from datetime import datetime as dt, timezone
 from random import randint
 
-from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 import pyotp
 from qrcode import QRCode, constants
@@ -11,6 +11,9 @@ from qrcode import QRCode, constants
 from .models import TgCode
 from .exceptions import RetrievePermissionsError
 from config.settings import EMAIL_HOST_USER
+
+
+User = get_user_model()
 
 
 def generate_code(tg_account):

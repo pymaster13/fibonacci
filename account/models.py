@@ -58,15 +58,83 @@ class User(AbstractBaseUser, PermissionsMixin):
                                    editable=False,
                                    unique=True)
     can_invite = models.BooleanField(default=False)
-    inviter = models.OneToOneField('self',
-                                   on_delete=models.SET_NULL,
-                                   blank=True, null=True)
+    inviter = models.ForeignKey('self',
+                                on_delete=models.SET_NULL,
+                                default=None,
+                                blank=True,
+                                null=True)
     balance = models.FloatField(default=0.0)
+    line = models.IntegerField(default=1)
+
+    STATUSES = [
+        ('A', 'Active'),
+        ('P', 'Passive'),
+        ('N', 'NotActive'),
+    ]
+
+    status = models.CharField(
+        max_length=1,
+        choices=STATUSES,
+        default='N',
+    )
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    @staticmethod
+    def retrieve_all_user_partners(user, partners=None, to_check=None,
+                                   active=0, passive=0, nonactive=0):
+        if not partners and not to_check:
+            partners = {}
+            to_check = []
+
+        invited_users = User.objects.filter(inviter=user)
+
+        if invited_users or to_check:
+            if invited_users:
+                to_check.extend(invited_users)
+
+            next_user = to_check.pop()
+
+            if not partners.get(next_user.line):
+                partners[next_user.line] = []
+            partners[next_user.line].append(next_user.as_json())
+
+            if next_user.status == 'A':
+                active += 1
+            elif next_user.status == 'P':
+                passive += 1
+            else:
+                nonactive += 1
+
+            return User.retrieve_all_user_partners(next_user, partners,
+                                                   to_check, active,
+                                                   passive, nonactive)
+
+        return {'partners': partners, 'stats': {
+                                                'active': active,
+                                                'passive': passive,
+                                                'nonactive': nonactive,
+                                                }
+                }
+
+    @property
+    def partners(self):
+        partners = User.retrieve_all_user_partners(self)
+
+        return partners
+
+    def as_json(self):
+        return {
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'telegram': self.telegram.tg_nickname,
+            'balance': self.balance,
+            'line': self.line,
+        }
 
 
 class GoogleAuth(models.Model):
