@@ -6,7 +6,7 @@ from .views import (GetTgCodeView, RegisterUserView, LoginUserView,
                     CheckResetTokenView, ChangeUserPasswordView,
                     GenerateGoogleQRView, VerifyGoogleCodeView,
                     LoginAdminUserView, GrantPermissionsView,
-                    Reset2FAView)
+                    RetrievePermissionsView, Reset2FAView)
 
 
 urlpatterns = [
@@ -25,6 +25,7 @@ urlpatterns = [
     path('verify_google_code/', VerifyGoogleCodeView.as_view(), name='verify_google_code'),
 
     path('grant_permissions/', GrantPermissionsView.as_view(), name='grant_permissions'),
+    path('retrieve_permissions/', RetrievePermissionsView.as_view(), name='retrieve_permissions'),
     path('reset_2fa/', Reset2FAView.as_view(), name='reset_2fa'),
 
     # Reset user password

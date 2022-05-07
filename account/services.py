@@ -113,3 +113,24 @@ def grant_permissions(user, perms):
     except Exception as e:
         print(e)
         raise GrantPermissionsError("Ошибка предоставления прав пользователю.")
+
+
+def retrieve_permissions(user):
+    """Help function to retrieve user permissions."""
+
+    permissions_db = ("ido", "transaction", "user", "news")
+    try:
+        permissions = set()
+        for perm in user.user_permissions.all():
+            name = perm.codename.split('_')[1]
+            if name in permissions_db:
+                permissions.add(name)
+
+        if user.is_staff or user.is_superuser:
+            permissions.add('admin')
+
+        return permissions
+
+    except Exception as e:
+        print(e)
+        raise GrantPermissionsError("Ошибка получения прав пользователя.")

@@ -12,7 +12,8 @@ import pyotp
 from .exceptions import (LoginUserError, EmailValidationError,
                          TgAccountVerifyError, InviterUserError,
                          UserWithTgExistsError, UserDoesNotExists,
-                         TokenDoesNotExists, GrantPermissionsError)
+                         TokenDoesNotExists, GrantPermissionsError,
+                         RetrievePermissionsError)
 from .models import TgAccount, TgCode, GoogleAuth
 from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           TgAccountSerializer, TgAccountCodeSerializer,
@@ -21,7 +22,8 @@ from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           GoogleCodeSerializer, LoginAdminSerializer)
 from .services import (generate_code, check_code_time,
                        verify_google_code, send_mail_message,
-                       generate_google_qrcode, grant_permissions)
+                       generate_google_qrcode, grant_permissions,
+                       retrieve_permissions)
 
 
 User = get_user_model()
@@ -362,6 +364,23 @@ class GrantPermissionsView(GenericAPIView):
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         else:
             return Response({'user': user.email, 'status': "success"})
+
+
+class RetrievePermissionsView(GenericAPIView):
+    """API endpoint to retrieve user permissions."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+
+        try:
+            permissions = retrieve_permissions(user)
+        except RetrievePermissionsError as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'user': user.email,
+                             'permissions': list(permissions)})
 
 
 class Reset2FAView(GenericAPIView):
