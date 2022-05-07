@@ -51,12 +51,6 @@ class TokenDoesNotExists(AccountError):
         super().__init__(error)
 
 
-class GrantPermissionsError(AccountError):
-    def __init__(self, error) -> None:
-        self.error = error
-        super().__init__(error)
-
-
 class RetrievePermissionsError(AccountError):
     def __init__(self, error) -> None:
         self.error = error

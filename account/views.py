@@ -1,29 +1,25 @@
 from django.contrib.auth import get_user_model
-
 from rest_framework.authtoken.models import Token as ResetPasswordToken
-from rest_framework.status import (HTTP_400_BAD_REQUEST,
-                                   HTTP_200_OK)
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.status import (HTTP_400_BAD_REQUEST,
+                                   HTTP_200_OK)
 from knox.models import AuthToken
 import pyotp
 
 from .exceptions import (LoginUserError, EmailValidationError,
                          TgAccountVerifyError, InviterUserError,
                          UserWithTgExistsError, UserDoesNotExists,
-                         TokenDoesNotExists, GrantPermissionsError,
-                         RetrievePermissionsError)
+                         TokenDoesNotExists, RetrievePermissionsError)
 from .models import TgAccount, TgCode, GoogleAuth
 from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           TgAccountSerializer, TgAccountCodeSerializer,
                           EmailSerializer, ChangePasswordSerializer,
-                          ResetPasswordTokenSerializer, PermissionsSerializer,
-                          GoogleCodeSerializer, LoginAdminSerializer)
+                          ResetPasswordTokenSerializer, GoogleCodeSerializer)
 from .services import (generate_code, check_code_time,
                        verify_google_code, send_mail_message,
-                       generate_google_qrcode, grant_permissions,
-                       retrieve_permissions)
+                       generate_google_qrcode, retrieve_permissions)
 
 
 User = get_user_model()
@@ -310,62 +306,6 @@ class VerifyGoogleCodeView(GenericAPIView):
         return Response({'status': 'success'})
 
 
-class LoginAdminUserView(GenericAPIView):
-    """API endpoint for admin authentication."""
-
-    serializer_class = LoginAdminSerializer
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except (LoginUserError, EmailValidationError) as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
-
-        admin, code = serializer.validated_data
-
-        google_auth = GoogleAuth.objects.get(user=admin)
-        result = verify_google_code(google_auth.token, code)
-        if not result:
-            return Response({"error": "Введите корректный код."},
-                            status=HTTP_400_BAD_REQUEST
-                            )
-
-        google_auth.is_installed = True
-        google_auth.save()
-
-        return Response({
-            "id": admin.id,
-            "email": admin.email,
-            "token": AuthToken.objects.create(admin)[1]
-        })
-
-
-class GrantPermissionsView(GenericAPIView):
-    """API endpoint to grant permissions to user."""
-
-    serializer_class = PermissionsSerializer
-    permission_classes = (IsAdminUser,)
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except (EmailValidationError, UserDoesNotExists) as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
-
-        user, perms = serializer.validated_data
-
-        try:
-            grant_permissions(user, perms)
-        except GrantPermissionsError as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'user': user.email, 'status': "success"})
-
-
 class RetrievePermissionsView(GenericAPIView):
     """API endpoint to retrieve user permissions."""
 
@@ -381,30 +321,3 @@ class RetrievePermissionsView(GenericAPIView):
         else:
             return Response({'user': user.email,
                              'permissions': list(permissions)})
-
-
-class Reset2FAView(GenericAPIView):
-    """API endpoint to reset user 2FA."""
-
-    serializer_class = EmailSerializer
-    permission_classes = (IsAdminUser,)
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except (EmailValidationError, UserDoesNotExists) as e:
-            return Response({"error": str(e)})
-
-        user = User.objects.get(email=serializer.validated_data['email'])
-
-        try:
-            google_auth = GoogleAuth.objects.get(user=user)
-            google_auth.delete()
-            return Response({'user': user.email, 'status': "success"})
-        except Exception as e:
-            print(e)
-            return Response({
-                "error": 'Аккаунт не привязан к Google Authenticator.'},
-                status=HTTP_400_BAD_REQUEST)

@@ -10,11 +10,12 @@ from .settings import MEDIA_ROOT, MEDIA_URL
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/account/', include('account.urls')),
+    path('api/v1/admin/', include('administrator.urls')),
     path('api/v1/news/', include('news.urls')),
     path('api/v1/core/', include('core.urls')),
     path('api/v1/ido/', include('ido.urls')),
 
-    #Swagger UI
+    # Swagger UI
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(
         template_name="swagger-ui.html", url_name="schema"),

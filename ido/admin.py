@@ -21,4 +21,4 @@ class ManuallyChargeAdmin(admin.ModelAdmin):
 
 @admin.register(IDOParticipant)
 class IDOParticipantAdmin(admin.ModelAdmin):
-    list_display = ('ido', 'user', 'priority')
+    list_display = ('ido', 'user', 'priority', 'allocation')

@@ -8,7 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(dotenv_path=os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    'django-insecure-awa!tm@0wkf0&(8dousmgn3+56!1q6(^war76^_7*()$7#61f%'
+    )
 
 DEBUG = True
 
@@ -29,6 +32,7 @@ INSTALLED_APPS = [
     'drf_spectacular',  # Swagger UI
 
     'account',
+    'administrator',
     'core',
     'news',
     'ido',
@@ -124,9 +128,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = 25
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER',
+                            'fibonacci.info@mail.ru')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_APP_PASSWORD',
+                                'u9MgAiWmSbX0GV4TV0Zf')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-COINMARKETCAP_API_KEY = os.getenv("COINMARKETCAP_API_KEY")
+COINMARKETCAP_API_KEY = os.getenv('COINMARKETCAP_API_KEY',
+                                  'cc32eb41-1867-478f-8610-75592817a613')

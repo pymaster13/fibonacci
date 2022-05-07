@@ -117,7 +117,7 @@ class ManuallyCharge(models.Model):
 
 class IDOParticipant(models.Model):
     """Model of IDO participant.
-    Fields: type (transcript):
+    Fields: type:
         - ido: IDO
         - user: User
         - priority: str
@@ -130,3 +130,4 @@ class IDOParticipant(models.Model):
                              on_delete=models.CASCADE,
                              verbose_name='User')
     priority = models.IntegerField(default=0, verbose_name='Priority')
+    allocation = models.FloatField(null=True, verbose_name='Allocation')
