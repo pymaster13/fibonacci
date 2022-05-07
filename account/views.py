@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
+
 from rest_framework.authtoken.models import Token as ResetPasswordToken
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
                                    HTTP_200_OK)
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from knox.models import AuthToken
 import pyotp
@@ -11,16 +12,16 @@ import pyotp
 from .exceptions import (LoginUserError, EmailValidationError,
                          TgAccountVerifyError, InviterUserError,
                          UserWithTgExistsError, UserDoesNotExists,
-                         TokenDoesNotExists)
+                         TokenDoesNotExists, GrantPermissionsError)
 from .models import TgAccount, TgCode, GoogleAuth
 from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           TgAccountSerializer, TgAccountCodeSerializer,
                           EmailSerializer, ChangePasswordSerializer,
-                          ResetPasswordTokenSerializer,
+                          ResetPasswordTokenSerializer, PermissionsSerializer,
                           GoogleCodeSerializer, LoginAdminSerializer)
 from .services import (generate_code, check_code_time,
                        verify_google_code, send_mail_message,
-                       generate_google_qrcode)
+                       generate_google_qrcode, grant_permissions)
 
 
 User = get_user_model()
@@ -332,3 +333,27 @@ class LoginAdminUserView(GenericAPIView):
             "email": admin.email,
             "token": AuthToken.objects.create(admin)[1]
         })
+
+
+class GrantPermissionsView(GenericAPIView):
+    """API endpoint to grant permissions to user."""
+
+    serializer_class = PermissionsSerializer
+    permission_classes = (IsAdminUser,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (EmailValidationError, UserDoesNotExists) as e:
+            return Response({"error": str(e)})
+
+        user, perms = serializer.validated_data
+
+        try:
+            grant_permissions(user, perms)
+        except GrantPermissionsError as e:
+            return Response({"error": str(e)})
+        else:
+            return Response({'user': user.email, 'status': "success"})

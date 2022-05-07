@@ -3,10 +3,12 @@ import io
 from datetime import datetime as dt, timezone
 from random import randint
 
+from django.contrib.auth.models import Permission
 from django.core.mail import send_mail
 import pyotp
 from qrcode import QRCode, constants
 
+from .exceptions import GrantPermissionsError
 from .models import TgCode
 from config.settings import EMAIL_HOST_USER
 
@@ -74,7 +76,40 @@ def generate_google_qrcode(token, email):
 def verify_google_code(token, code):
     """Help function to verify code Google Authenticator."""
     t = pyotp.TOTP(token)
-    print(token, code)
-    print(t.now())
     result = t.verify(code)
     return result if result is True else False
+
+
+def grant_permissions(user, perms):
+    """Help function to grant permissions to user"""
+    try:
+        actions = ('add', 'change', 'delete')
+        permissions_db = ("ido", "transaction", "user", "news")
+        result_perms = []
+
+        for perm in perms:
+            if perm in permissions_db:
+                for action in actions:
+                    codename = f'{action}_{perm}'
+                    perm_obj = Permission.objects.get(codename=codename)
+                    result_perms.append(perm_obj)
+
+        if 'admin' in perms:
+            user.is_staff = True
+            user.is_superuser = True
+        else:
+            user.is_staff = False
+            user.is_superuser = False
+
+        if result_perms:
+            user.user_permissions.set(result_perms)
+        else:
+            user.user_permissions.clear()
+
+        user.save()
+
+        return True
+
+    except Exception as e:
+        print(e)
+        raise GrantPermissionsError("Ошибка предоставления прав пользователю.")
