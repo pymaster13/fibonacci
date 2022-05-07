@@ -275,7 +275,8 @@ class GenerateGoogleQRView(GenericAPIView):
         qrcode = generate_google_qrcode(google_auth.token, user.email)
         if not qrcode:
             return Response(
-                {"error": "Ошибка генерации QR-кода гугл-аутентификации."}
+                {"error": "Ошибка генерации QR-кода гугл-аутентификации."},
+                status=HTTP_400_BAD_REQUEST
                 )
         return Response({'qr-code': qrcode})
 
@@ -297,7 +298,9 @@ class VerifyGoogleCodeView(GenericAPIView):
         result = verify_google_code(google_auth.token,
                                     serializer.validated_data['code'])
         if not result:
-            return Response({"error": "Введите корректный код."})
+            return Response({"error": "Введите корректный код."},
+                            status=HTTP_400_BAD_REQUEST
+                            )
 
         google_auth.is_installed = True
         google_auth.save()
@@ -323,7 +326,9 @@ class LoginAdminUserView(GenericAPIView):
         google_auth = GoogleAuth.objects.get(user=admin)
         result = verify_google_code(google_auth.token, code)
         if not result:
-            return Response({"error": "Введите корректный код."})
+            return Response({"error": "Введите корректный код."},
+                            status=HTTP_400_BAD_REQUEST
+                            )
 
         google_auth.is_installed = True
         google_auth.save()
@@ -347,13 +352,40 @@ class GrantPermissionsView(GenericAPIView):
         try:
             serializer.is_valid(raise_exception=True)
         except (EmailValidationError, UserDoesNotExists) as e:
-            return Response({"error": str(e)})
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         user, perms = serializer.validated_data
 
         try:
             grant_permissions(user, perms)
         except GrantPermissionsError as e:
-            return Response({"error": str(e)})
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         else:
             return Response({'user': user.email, 'status': "success"})
+
+
+class Reset2FAView(GenericAPIView):
+    """API endpoint to reset user 2FA."""
+
+    serializer_class = EmailSerializer
+    permission_classes = (IsAdminUser,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (EmailValidationError, UserDoesNotExists) as e:
+            return Response({"error": str(e)})
+
+        user = User.objects.get(email=serializer.validated_data['email'])
+
+        try:
+            google_auth = GoogleAuth.objects.get(user=user)
+            google_auth.delete()
+            return Response({'user': user.email, 'status': "success"})
+        except Exception as e:
+            print(e)
+            return Response({
+                "error": 'Аккаунт не привязан к Google Authenticator.'},
+                status=HTTP_400_BAD_REQUEST)
