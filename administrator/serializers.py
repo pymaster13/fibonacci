@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from account.exceptions import (EmailValidationError, LoginUserError,
                                 UserDoesNotExists)
-
+from account.serializers import EmailSerializer
 
 User = get_user_model()
 
@@ -75,3 +75,13 @@ class PermissionsSerializer(serializers.Serializer):
                 "Пользователя с таким почтовым ящиком не существует."
                 )
         return user, attrs['permissions']
+
+
+class AddVIPUserSerializer(EmailSerializer):
+    """Serializer for adding VIP user."""
+
+    profit = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Процент не может быть пустым."
+                            })

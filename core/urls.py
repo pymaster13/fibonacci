@@ -1,8 +1,9 @@
 from django.urls import path
 
-from .views import (AddMetamaskWalletView)
+from .views import (AddMetamaskWalletView, RetrieveMetamaskWalletView)
 
 
 urlpatterns = [
-    path('add_metamask_wallet/', AddMetamaskWalletView.as_view(), name='add_metamask_wallet'),
+    path('set_metamask/', AddMetamaskWalletView.as_view(), name='set_metamask'),
+    path('retrieve_metamask/', RetrieveMetamaskWalletView.as_view(), name='retrieve_metamask'),
 ]

@@ -34,13 +34,40 @@ class AddMetamaskWalletView(GenericAPIView):
             wallet_address = serializer.validated_data['wallet_address']
 
             address = Address.objects.create(address=wallet_address)
-            metamask, _ = MetamaskWallet.objects.get_or_create(user=user)
-            metamask.wallet_address = address
-            metamask.save()
 
-            return Response({'binded': True})
+            try:
+                existed_metamask = MetamaskWallet.objects.get(user=user)
+            except Exception:
+                MetamaskWallet.objects.create(user=user,
+                                              wallet_address=address)
+                return Response({'status': 'binded'})
+            else:
+                old_address = existed_metamask.wallet_address
+                existed_metamask.wallet_address = address
+                existed_metamask.save()
+                old_address.delete()
+                return Response({'status': 'changed'})
 
         except Exception as e:
             print(e)
             return Response({"error": 'Ошибка привязки адреса кошелька.'},
+                            status=HTTP_400_BAD_REQUEST)
+
+
+class RetrieveMetamaskWalletView(GenericAPIView):
+    """API endpoint for retriebing metamask to account."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        try:
+            user = User.objects.get(email=request.user)
+            metamask, _ = MetamaskWallet.objects.get(user=user)
+            wallet_address = metamask.wallet_address.address
+            return Response({'wallet_address': wallet_address})
+
+        except Exception as e:
+            print(e)
+            return Response({"error": 'Ошибка получения адреса кошелька.'},
                             status=HTTP_400_BAD_REQUEST)
