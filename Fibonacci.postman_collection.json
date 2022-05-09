@@ -1,0 +1,1532 @@
+{
+	"info": {
+		"_postman_id": "e7224902-f9cf-4c26-a9da-3d3f5c037300",
+		"name": "Fibonacci",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Get telegram code",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "tg_nickname",
+									"value": "12",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/get_tg_code/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"get_tg_code",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm telegram account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "tg_nickname",
+									"value": "12",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "242218",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/confirm_tg_account/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"confirm_tg_account",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "12@ya.ru",
+									"type": "text"
+								},
+								{
+									"key": "tg_nickname",
+									"value": "12",
+									"type": "text"
+								},
+								{
+									"key": "first_name",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "inviter",
+									"value": "dd94ff46-bb57-4f45-b81b-b36c503469c5",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/register/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "321@ya.ru",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tg_nickname",
+									"value": "555",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "first_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "inviter",
+									"value": "05ae5eaa-cfb5-4086-be59-52ee8a5aef08",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/login/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Google QR-code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "email",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/generate_qr/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"generate_qr",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Google code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 4305544aa4d44de5e699b0e3820a42df48cc5dba0e0bc3abad63799d3479324e",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "1@ya.ru",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "123",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "code",
+									"value": "513845",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/verify_google_code/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"verify_google_code",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 4305544aa4d44de5e699b0e3820a42df48cc5dba0e0bc3abad63799d3479324e",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/account/logout/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"logout",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ...",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "321@ya.ru",
+									"type": "text"
+								},
+								{
+									"key": "tg_nickname",
+									"value": "555",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "first_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "inviter",
+									"value": "05ae5eaa-cfb5-4086-be59-52ee8a5aef08",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/reset_password/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"reset_password",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password confirm",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ...",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "pyma",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "tg_nickname",
+									"value": "555",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "first_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "inviter",
+									"value": "05ae5eaa-cfb5-4086-be59-52ee8a5aef08",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "token",
+									"value": "d0e7d77b6001f2b4301734c6da31bacf3afa0eea",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/reset_password_confirm/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"reset_password_confirm",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ...",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "321@ya.ru",
+									"type": "text"
+								},
+								{
+									"key": "tg_nickname",
+									"value": "555",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "first_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "inviter",
+									"value": "05ae5eaa-cfb5-4086-be59-52ee8a5aef08",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "token",
+									"value": "24bd009c14011b63543f1ba757882fb7bbfb95c8",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/change_password/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"change_password",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "News",
+			"item": [
+				{
+					"name": "List news",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 26cb9727106072af18d7bf950a662ec6abecfc40463eb0a086a8bb2bcfe9f441",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/news/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"news",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update news",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 7c64951ec39393f6bc4367ccc5a9248d94d540f1d23346e91d81dcecadfa1a86",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "header",
+									"value": "33",
+									"type": "text"
+								},
+								{
+									"key": "body",
+									"value": "44",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"value": "55",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/news/update/1/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"news",
+								"update",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve news",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 26cb9727106072af18d7bf950a662ec6abecfc40463eb0a086a8bb2bcfe9f441",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/news/1/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"news",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete news",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 7c64951ec39393f6bc4367ccc5a9248d94d540f1d23346e91d81dcecadfa1a86",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/news/delete/1/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"news",
+								"delete",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create news",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 217c2a5c64ab9e9894e3c738424e3d18b3155adca49b20da3dc95030ca9690ea",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "header",
+									"value": "1111321312",
+									"type": "text"
+								},
+								{
+									"key": "body",
+									"value": "2222",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"value": "33",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/news/create/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"news",
+								"create",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "IDO",
+			"item": [
+				{
+					"name": "List IDO",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve IDO",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/3/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"3",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete IDO",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 6b0666e27978da23b5adf97034152bf62575c65373f3ac6ccff5b97231252fac",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/delete/3/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"delete",
+								"3",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create IDO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 217c2a5c64ab9e9894e3c738424e3d18b3155adca49b20da3dc95030ca9690ea",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "IDO2321",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Desc44",
+									"type": "text"
+								},
+								{
+									"key": "general_allocation",
+									"value": "3500000",
+									"type": "text"
+								},
+								{
+									"key": "person_allocation",
+									"value": "123",
+									"type": "text"
+								},
+								{
+									"key": "buy_date",
+									"value": "2000-01-01",
+									"type": "text"
+								},
+								{
+									"key": "tge",
+									"value": "2000-01-02",
+									"type": "text"
+								},
+								{
+									"key": "vesting",
+									"value": "2000-01-03",
+									"type": "text"
+								},
+								{
+									"key": "coin",
+									"value": "FVC",
+									"type": "text"
+								},
+								{
+									"key": "coin_network",
+									"value": "BOP32",
+									"type": "text"
+								},
+								{
+									"key": "commission",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "gtGluCQnJ/Снимок экрана от 2021-07-03 21-37-05.png"
+								},
+								{
+									"key": "smartcontract",
+									"value": "fksaofksaopfksapofkopsakfaslmflkasfmlksaf211323",
+									"type": "text"
+								},
+								{
+									"key": "exchange",
+									"value": "Binance",
+									"type": "text"
+								},
+								{
+									"key": "telegram_acc",
+									"value": "https:/.//",
+									"type": "text"
+								},
+								{
+									"key": "twitter_acc",
+									"value": "https:/.//2121",
+									"type": "text"
+								},
+								{
+									"key": "discord_acc",
+									"value": "https:/.//21213",
+									"type": "text"
+								},
+								{
+									"key": "site",
+									"value": "https:/.//1312124124",
+									"type": "text"
+								},
+								{
+									"key": "white_paper",
+									"value": "https:/.//2",
+									"type": "text"
+								},
+								{
+									"key": "without_pay",
+									"value": "True",
+									"type": "text"
+								},
+								{
+									"key": "charge_manually",
+									"value": "True",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/create/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"create",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update IDO",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 6b0666e27978da23b5adf97034152bf62575c65373f3ac6ccff5b97231252fac",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "IDO22233123123",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Desc44312312",
+									"type": "text"
+								},
+								{
+									"key": "general_allocation",
+									"value": "3500000",
+									"type": "text"
+								},
+								{
+									"key": "person_allocation",
+									"value": "123",
+									"type": "text"
+								},
+								{
+									"key": "buy_date",
+									"value": "2000-01-01",
+									"type": "text"
+								},
+								{
+									"key": "tge",
+									"value": "2000-01-02",
+									"type": "text"
+								},
+								{
+									"key": "vesting",
+									"value": "2000-01-03",
+									"type": "text"
+								},
+								{
+									"key": "coin",
+									"value": "FVC",
+									"type": "text"
+								},
+								{
+									"key": "coin_network",
+									"value": "BOP32",
+									"type": "text"
+								},
+								{
+									"key": "commission",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "1I-INCytV/Снимок экрана от 2021-04-21 21-37-51.png"
+								},
+								{
+									"key": "smartcontract",
+									"value": "fksaofksaopfksapofkopsakfaslmflkasfmlksaf",
+									"type": "text"
+								},
+								{
+									"key": "exchange",
+									"value": "Binance",
+									"type": "text"
+								},
+								{
+									"key": "telegram_acc",
+									"value": "https:/.//",
+									"type": "text"
+								},
+								{
+									"key": "twitter_acc",
+									"value": "https:/.//2121",
+									"type": "text"
+								},
+								{
+									"key": "discord_acc",
+									"value": "https:/.//21213",
+									"type": "text"
+								},
+								{
+									"key": "site",
+									"value": "https:/.//1312124124",
+									"type": "text"
+								},
+								{
+									"key": "white_paper",
+									"value": "https:/.//2",
+									"type": "text"
+								},
+								{
+									"key": "without_pay",
+									"value": "True",
+									"type": "text"
+								},
+								{
+									"key": "charge_manually",
+									"value": "True",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/update/3/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"update",
+								"3",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Metamask",
+			"item": [
+				{
+					"name": "Add metamask wallet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "wallet_address",
+									"value": "31231231231213",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/add_metamask_wallet/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"add_metamask_wallet",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve metamask",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "wallet_address",
+									"value": "31231231231213",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/add_metamask_wallet/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"add_metamask_wallet",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Login Admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "716378",
+									"type": "text"
+								},
+								{
+									"key": "first_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "inviter",
+									"value": "05ae5eaa-cfb5-4086-be59-52ee8a5aef08",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/login_admin_2fa/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"login_admin_2fa",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Grant permissions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ed3ac00f346cb0a1f339698a9ccccc0381a7d6d572c4605bd38ab442c223321f",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\": \"321@ya.ru\", \"permissions\": [\"ido\", \"transaction\", \"user\", \"news\", \"statistics\", \"admin\"]}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/grant_permissions/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"grant_permissions",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add vip user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token bd9c418ede9f0c1e4a24de61018ae51b68bf912721d7acaac9f86d6b86445c66",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "22@ya.ru",
+									"type": "text"
+								},
+								{
+									"key": "profit",
+									"value": "223",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/vip_user/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"vip_user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete vip user",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token bd9c418ede9f0c1e4a24de61018ae51b68bf912721d7acaac9f86d6b86445c66",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "22@ya.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/delete_vip_user/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"delete_vip_user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Allow user invite and open inteface",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ed3ac00f346cb0a1f339698a9ccccc0381a7d6d572c4605bd38ab442c223321f",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c0d258705844f6cc3ae8d17d147f3910311b434b905297cafb40eea9d254e0fe",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "22@ya.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/allow_invite/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"allow_invite",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset user 2 FA",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ed3ac00f346cb0a1f339698a9ccccc0381a7d6d572c4605bd38ab442c223321f",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/reset_2fa/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"reset_2fa",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Retrieve user permissions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token c0d258705844f6cc3ae8d17d147f3910311b434b905297cafb40eea9d254e0fe",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/retrieve_permissions/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"retrieve_permissions",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
