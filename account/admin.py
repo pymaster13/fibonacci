@@ -14,7 +14,7 @@ class UserAdmin(DjangoUserAdmin):
         ('Personal info', {'fields': ('email', 'telegram',
                                       'first_name', 'last_name', 'inviter',
                                       'line', 'is_active', 'status',
-                                      'is_superuser', 'can_invite',
+                                      'is_superuser', 'can_invite', 'balance',
                                       'is_staff')}),
         ('Password info', {'fields': ('password',)}),
         ('Groups, permissions', {

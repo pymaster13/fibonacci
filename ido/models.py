@@ -2,7 +2,7 @@ from enum import unique
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from core.models import (Exchange, Coin, CoinNetwork, Address)
+from core.models import (Exchange, Coin, Address)
 
 
 User = get_user_model()
@@ -20,8 +20,7 @@ class IDO(models.Model):
         - vesting: datetime (where tokens take effect)
         - smartcontract: Address (smart-contract address)
         - exchange: Exchange (reference to exchange)
-        - coin: Coin (e.g. BTC)
-        - coin_network: CoinNetwork (e.g. BEP20)
+        - coin: Coin.name (e.g. BTC)
         - commission: float (owner platform commission in percents)
         - telegram_acc: str
         - twitter_acc: str
@@ -39,20 +38,19 @@ class IDO(models.Model):
     person_allocation = models.FloatField(verbose_name='Person allocation')
     buy_date = models.DateTimeField(verbose_name='Buy date')
     tge = models.DateTimeField(verbose_name='Token Generating Event')
-    vesting = models.DateTimeField(verbose_name='Vesting')
+    vesting =models.CharField(max_length=128, verbose_name='Vesting')
     smartcontract = models.OneToOneField(Address,
                                          null=True,
                                          on_delete=models.CASCADE,
                                          verbose_name='Smartcontract address')
     exchange = models.ForeignKey(Exchange,
+                                 null=True,
                                  on_delete=models.CASCADE,
                                  verbose_name='Exchange')
     coin = models.ForeignKey(Coin,
+                             null=True,
                              on_delete=models.CASCADE,
                              verbose_name='Coin')
-    coin_network = models.ForeignKey(CoinNetwork,
-                                     on_delete=models.CASCADE,
-                                     verbose_name='Network')
     commission = models.FloatField(verbose_name='Platform commission, percent')
     telegram_acc = models.CharField(max_length=128,
                                     null=True,

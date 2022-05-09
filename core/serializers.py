@@ -30,3 +30,13 @@ class MetamaskWalletSerializer(serializers.Serializer):
                     'Такой кошелек уже привязан.'
                     )
         return wallet_address
+
+
+class UserReserveSerializer(serializers.Serializer):
+    """Serializer for user reserve."""
+
+    amount = serializers.FloatField(required=True,
+                                    error_messages={
+                                        'blank': "Сумма не может быть пустой.",
+                                        'required': "Поле 'сумма' отсутствует."
+                                        })

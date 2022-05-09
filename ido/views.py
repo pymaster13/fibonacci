@@ -8,6 +8,7 @@ from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .exceptions import ExchangeAddError
 from .models import IDO, UserOutOrder, ManuallyCharge
 from .serializers import (IDOSerializer, UserOutOrderSerializer,
                           ManuallyCharge)
@@ -43,9 +44,12 @@ class IDOCreateView(CreateAPIView):
     def create(self, request):
         user = User.objects.get(email=request.user)
         if user.has_perm('ido.add_ido') or user.is_superuser:
-
-            data = process_ido_data(request.data)
-
+            try:
+                data = process_ido_data(request.data)
+            except ExchangeAddError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=HTTP_400_BAD_REQUEST)
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
@@ -71,7 +75,20 @@ class IDOUpdateView(UpdateAPIView):
         if user.has_perm('ido.change_ido') or user.is_superuser:
             partial = kwargs.pop('partial', False)
             instance = self.get_object()
+
+            try:
+                data = process_ido_data(request.data)
+            except ExchangeAddError as e:
+                return Response(
+                    {"error": str(e)},
+                    status=HTTP_400_BAD_REQUEST)
+
             data = process_ido_data(request.data)
+
+            if data is None:
+                return Response({'status': 'Изменений нет.'},
+                                status=HTTP_200_OK)
+
             serializer = self.get_serializer(
                 instance,
                 data=data,

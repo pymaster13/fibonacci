@@ -6,7 +6,7 @@ User = get_user_model()
 
 
 class Address(models.Model):
-    """Model of address for metamask or smartcontract"""
+    """Model of address for metamask or smartcontract."""
 
     address = models.CharField(max_length=128,
                                unique=True,
@@ -17,7 +17,7 @@ class Address(models.Model):
 
 
 class MetamaskWallet(models.Model):
-    """Model of Metamask wallet binded to user account"""
+    """Model of Metamask wallet binded to user account."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE,
                                 verbose_name='Metamask owner')
@@ -28,41 +28,44 @@ class MetamaskWallet(models.Model):
         return self.wallet_address.address
 
 
-class Exchange(models.Model):
-    """Model of exchange"""
+class AdminWallet(models.Model):
+    """Model of Admin metamask wallet."""
 
-    name = models.CharField(max_length=128,
-                            unique=True,
-                            verbose_name='Exchange name')
+    wallet_address = models.OneToOneField(Address, on_delete=models.CASCADE,
+                                          verbose_name='Admin wallet address')
+    balance = models.FloatField(default=0, verbose_name='Admin wallet balance')
 
     def __str__(self):
-        return self.name
+        return self.wallet_address.address
+
+
+class Exchange(models.Model):
+    """Model of exchange."""
+
+    reference = models.CharField(max_length=128,
+                                 unique=True,
+                                 verbose_name='Exchange reference')
+
+    def __str__(self):
+        return self.reference
 
 
 class Coin(models.Model):
-    """Model of coin"""
+    """Model of coin."""
 
     name = models.CharField(max_length=4,
                             unique=True,
                             verbose_name='Coin abbreviation')
-
-    def __str__(self):
-        return self.name
-
-
-class CoinNetwork(models.Model):
-    """Model of coin"""
-
-    name = models.CharField(max_length=4,
-                            unique=True,
-                            verbose_name='Coin network')
+    network = models.CharField(max_length=128,
+                               unique=True,
+                               verbose_name='Coin network')
 
     def __str__(self):
         return self.name
 
 
 class Transaction(models.Model):
-    """Model of transaction"""
+    """Model of transaction."""
 
     address_from = models.ForeignKey(Address,
                                      on_delete=models.CASCADE,
@@ -76,6 +79,6 @@ class Transaction(models.Model):
                              on_delete=models.CASCADE,
                              verbose_name='Transaction coin')
     amount = models.FloatField(verbose_name='Transaction amount (volume)')
-    commission = models.FloatField(null=True,
-                                   blank=True,
+    commission = models.FloatField(default=0,
                                    verbose_name='Transaction commission')
+    date = models.DateTimeField(auto_now_add=True)

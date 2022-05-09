@@ -1,8 +1,12 @@
 ﻿
-from .models import Address, Exchange, Coin, CoinNetwork
+from .models import Address, Exchange, Coin
+from .exceptions import ExchangeAddError
 
 
 def process_ido_data(request_query_dict: dict):
+
+    if not request_query_dict:
+        return
 
     data = dict(request_query_dict.dict())
     print('request data', data)
@@ -19,23 +23,18 @@ def process_ido_data(request_query_dict: dict):
 
     exchange = data.get('exchange')
     if exchange:
-        exchange_obj, _ = Exchange.objects.get_or_create(name=exchange)
-        exchange = exchange_obj.pk
-        tmp_data['exchange'] = exchange
+        exchange_obj, _ = Exchange.objects.get_or_create(reference=exchange)
+        tmp_data['exchange'] = exchange_obj.pk
 
-    coin = data.get('coin')
-    if coin:
-        coin_obj, _ = Coin.objects.get_or_create(name=coin)
-        coin = coin_obj.pk
-        tmp_data['coin'] = coin
-
-    coin_network = data.get('coin_network')
-    if coin_network:
-        coin_network_obj, _ = CoinNetwork.objects.get_or_create(
-                                                    name=coin_network
-                                                    )
-        coin_network = coin_network_obj.pk
-        tmp_data['coin_network'] = coin_network
+    try:
+        coin = data.get('coin')
+        coin_network = data.get('coin_network')
+        if coin and coin_network:
+            coin_obj, _ = Coin.objects.get_or_create(name=coin,
+                                                     network=coin_network)
+            tmp_data['coin'] = coin_obj.pk
+    except Exception:
+        raise ExchangeAddError('Указаны неверные данные о монете.')
 
     data.update(tmp_data)
 
