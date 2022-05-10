@@ -1,4 +1,3 @@
-from enum import unique
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -119,6 +118,7 @@ class IDOParticipant(models.Model):
         - ido: IDO
         - user: User
         - priority: str
+        - allocation: float
     """
 
     ido = models.ForeignKey(IDO, default=None, null=True,
@@ -129,3 +129,6 @@ class IDOParticipant(models.Model):
                              verbose_name='User')
     priority = models.IntegerField(default=0, verbose_name='Priority')
     allocation = models.FloatField(null=True, verbose_name='Allocation')
+
+    queue_place = models.IntegerField(null=True, verbose_name='Queue place')
+    date = models.DateTimeField(auto_now_add=True)

@@ -85,3 +85,9 @@ class AddVIPUserSerializer(EmailSerializer):
                         error_messages={
                             'blank': "Процент не может быть пустым."
                             })
+
+
+class UserPrioritySerializer(EmailSerializer):
+    """Serializer for setting user priority."""
+
+    priority = serializers.IntegerField(required=False)

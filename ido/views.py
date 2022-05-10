@@ -4,14 +4,14 @@ from rest_framework.status import (HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN,
                                    HTTP_201_CREATED)
 from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
                                      UpdateAPIView, DestroyAPIView,
-                                     ListAPIView)
+                                     ListAPIView, GenericAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .exceptions import ExchangeAddError
-from .models import IDO, UserOutOrder, ManuallyCharge
+from .models import IDO, IDOParticipant, UserOutOrder, ManuallyCharge
 from .serializers import (IDOSerializer, UserOutOrderSerializer,
-                          ManuallyCharge)
+                          ManuallyCharge, ParticipateIDOSerializer)
 from .services import process_ido_data
 
 User = get_user_model()
@@ -124,3 +124,34 @@ class IDODeleteView(DestroyAPIView):
         return Response({
                 "error": 'У пользователя нет прав на удаление IDO.'
                 }, status=HTTP_403_FORBIDDEN)
+
+
+class ParticipateIDOView(GenericAPIView):
+    """API endpoint to participate in IDO by user."""
+
+    serializer_class = ParticipateIDOSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+
+            user = User.objects.get(email=request.user)
+
+            if user.balance < 651:
+                return Response(
+                    {'error': 'У пользователя недостаточно средств на счете.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+
+            ido = IDO.objects.get(pk=serializer.validated_data['ido'])
+            allocation = serializer.validated_data.get('allocation', None)
+            IDOParticipant.objects.create(user=user,
+                                          ido=ido,
+                                          allocation=allocation)
+            return Response({'status': 'success'})
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)

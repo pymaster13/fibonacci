@@ -14,7 +14,7 @@ from account.services import verify_google_code
 from .exceptions import GrantPermissionsError
 from .models import VIPUser
 from .serializers import (PermissionsSerializer, LoginAdminSerializer,
-                          AddVIPUserSerializer)
+                          AddVIPUserSerializer, UserPrioritySerializer)
 from .services import grant_permissions
 
 
@@ -186,3 +186,24 @@ class DeleteVIPUserView(GenericAPIView):
             return Response({
                 "error": 'Ошибка удаления VIP-пользователя.'},
                 status=HTTP_400_BAD_REQUEST)
+
+
+class SetUserPriorityView(GenericAPIView):
+    """API endpoint to set user priority."""
+
+    serializer_class = UserPrioritySerializer
+    permission_classes = (IsAdminUser,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (EmailValidationError, UserDoesNotExists) as e:
+            return Response({"error": str(e)})
+
+        user = User.objects.get(email=serializer.validated_data['email'])
+        user.priority = serializer.validated_data.get('priority', 0)
+        user.save()
+
+        return Response({'status': 'success'})

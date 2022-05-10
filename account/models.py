@@ -64,6 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 blank=True,
                                 null=True)
     balance = models.FloatField(default=0.0)
+    priority = models.IntegerField(default=0, verbose_name='Priority')
     line = models.IntegerField(default=1)
 
     STATUSES = [

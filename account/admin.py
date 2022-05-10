@@ -13,7 +13,7 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = (
         ('Personal info', {'fields': ('email', 'telegram',
                                       'first_name', 'last_name', 'inviter',
-                                      'line', 'is_active', 'status',
+                                      'line', 'is_active', 'status', 'priority',
                                       'is_superuser', 'can_invite', 'balance',
                                       'is_staff')}),
         ('Password info', {'fields': ('password',)}),
