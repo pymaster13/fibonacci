@@ -74,27 +74,6 @@ class IDO(models.Model):
         verbose_name_plural = "IDO"
 
 
-class UserOutOrder(models.Model):
-    """Model of users thar out of order (IDO.without_pay=True).
-    Fields: type (transcript):
-        - ido: IDO
-        - user: User
-        - allocation: float
-    """
-
-    ido = models.ForeignKey(IDO,
-                            on_delete=models.SET_NULL,
-                            null=True,
-                            verbose_name='IDO')
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             verbose_name='User')
-    allocation = models.FloatField(verbose_name='Allocation')
-
-    class Meta:
-        verbose_name_plural = "Users out order"
-
-
 class ManuallyCharge(models.Model):
     """Model of manually charges of coins (IDO.without_pay=True).
     Fields: type (transcript):
@@ -132,3 +111,6 @@ class IDOParticipant(models.Model):
 
     queue_place = models.IntegerField(null=True, verbose_name='Queue place')
     date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('ido', 'user')

@@ -8,10 +8,10 @@ from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .exceptions import ExchangeAddError
-from .models import IDO, IDOParticipant, UserOutOrder, ManuallyCharge
-from .serializers import (IDOSerializer, UserOutOrderSerializer,
-                          ManuallyCharge, ParticipateIDOSerializer)
+from .exceptions import ExchangeAddError, IDOExistsError, AllocationError
+from .models import IDO, IDOParticipant, ManuallyCharge
+from .serializers import (IDOSerializer,
+                          ManuallyCharge, ParticipateIDOSerializer, PureIDOSerializer)
 from .services import process_ido_data
 
 User = get_user_model()
@@ -21,7 +21,7 @@ class IDORetrieveView(RetrieveAPIView):
     """API endpoint for retrieving IDOs."""
 
     queryset = IDO.objects.all()
-    serializer_class = IDOSerializer
+    serializer_class = PureIDOSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = 'pk'
 
@@ -30,7 +30,7 @@ class IDOListView(ListAPIView):
     """API endpoint for showing all IDOs."""
 
     queryset = IDO.objects.all()
-    serializer_class = IDOSerializer
+    serializer_class = PureIDOSerializer
     permission_classes = (IsAuthenticated,)
 
 
@@ -44,19 +44,31 @@ class IDOCreateView(CreateAPIView):
     def create(self, request):
         user = User.objects.get(email=request.user)
         if user.has_perm('ido.add_ido') or user.is_superuser:
+
             try:
-                data = process_ido_data(request.data)
-            except ExchangeAddError as e:
+                data, users = process_ido_data(request.data)
+            except Exception as e:
                 return Response(
                     {"error": str(e)},
                     status=HTTP_400_BAD_REQUEST)
-            serializer = self.get_serializer(data=data)
+
+            serializer = PureIDOSerializer(data=data)
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+
+            ido = IDO.objects.create(**serializer.validated_data)
+
+            if users and serializer.validated_data['without_pay']:
+                for u in users:
+                    try:
+                        IDOParticipant.objects.create(user=u,
+                                                      ido=ido)
+                    except Exception:
+                        return Response(
+                            {'error': 'Один из пользователей уже в очереди данного IDO.'},
+                            status=HTTP_400_BAD_REQUEST
+                        )
             return Response(serializer.data,
-                            status=HTTP_201_CREATED,
-                            headers=headers)
+                            status=HTTP_201_CREATED)
         return Response({
                 "error": 'У пользователя нет прав на создание IDO.'
                 }, status=HTTP_403_FORBIDDEN)
@@ -77,19 +89,13 @@ class IDOUpdateView(UpdateAPIView):
             instance = self.get_object()
 
             try:
-                data = process_ido_data(request.data)
-            except ExchangeAddError as e:
+                data, users = process_ido_data(request.data)
+            except Exception as e:
                 return Response(
                     {"error": str(e)},
                     status=HTTP_400_BAD_REQUEST)
 
-            data = process_ido_data(request.data)
-
-            if data is None:
-                return Response({'status': 'Изменений нет.'},
-                                status=HTTP_200_OK)
-
-            serializer = self.get_serializer(
+            serializer = PureIDOSerializer(
                 instance,
                 data=data,
                 partial=partial)
@@ -99,7 +105,20 @@ class IDOUpdateView(UpdateAPIView):
             if getattr(instance, '_prefetched_objects_cache', None):
                 instance._prefetched_objects_cache = {}
 
-            return Response(serializer.data)
+            if instance.without_pay:
+                existed_users = IDOParticipant.objects.filter(
+                                            ido=instance
+                                            )
+                for existed_user in existed_users:
+                    if existed_user.user not in users:
+                        existed_user.delete()
+
+                for u in users:
+                    user, _ = IDOParticipant.objects.get_or_create(
+                                                      user=u,
+                                                      ido=instance)
+            return Response(serializer.data,
+                            status=HTTP_200_OK)
 
         return Response({
                 "error": 'У пользователя нет прав на изменение IDO.'
@@ -146,12 +165,25 @@ class ParticipateIDOView(GenericAPIView):
                     status=HTTP_400_BAD_REQUEST
                     )
 
-            ido = IDO.objects.get(pk=serializer.validated_data['ido'])
-            allocation = serializer.validated_data.get('allocation', None)
-            IDOParticipant.objects.create(user=user,
-                                          ido=ido,
-                                          allocation=allocation)
-            return Response({'status': 'success'})
+            ido, allocation = serializer.validated_data
+
+            if ido.without_pay:
+                return Response(
+                    {'error': 'Очередь для данного IDO назначается вручную.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+
+            try:
+                IDOParticipant.objects.create(user=user,
+                                              ido=ido,
+                                              allocation=allocation)
+            except Exception:
+                return Response(
+                    {'error': 'Пользователь уже в очереди данного IDO.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+            else:
+                return Response({'status': 'success'})
 
         except Exception as e:
             return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)

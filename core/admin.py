@@ -31,7 +31,6 @@ class AdminWalletAdmin(admin.ModelAdmin):
     list_display = ('wallet_address', 'balance')
 
 
-
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ('address_from', 'address_to',

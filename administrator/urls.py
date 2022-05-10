@@ -12,5 +12,5 @@ urlpatterns = [
     path('allow_invite/', AllowUserInviteView.as_view(), name='allow_invite'),
     path('vip_user/', AddVIPUserView.as_view(), name='vip_user'),
     path('delete_vip_user/', DeleteVIPUserView.as_view(), name='delete_vip_user'),
-    path('set_user_priority/', SetUserPriorityView.as_view(), name='set_user_priority'),  # NEED TO TEST
+    path('set_user_priority/', SetUserPriorityView.as_view(), name='set_user_priority'),
 ]
