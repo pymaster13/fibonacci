@@ -11,6 +11,7 @@ from ido.models import QueueUser
 from .exceptions import MetamaskWalletExistsError
 from .models import MetamaskWallet, AdminWallet, Coin, Transaction
 from .serializers import (MetamaskWalletSerializer, UserReserveSerializer)
+from .services import get_main_wallet
 
 
 User = get_user_model()
@@ -83,7 +84,7 @@ class RetrieveAdminWalletView(GenericAPIView):
 
     def get(self, request):
         try:
-            admin_wallet = AdminWallet.objects.first()
+            admin_wallet = get_main_wallet()
             return Response({'wallet_address': admin_wallet.wallet_address.address})
 
         except Exception as e:
@@ -115,7 +116,7 @@ class FillUserReserveView(GenericAPIView):
                     {'error': 'У пользователя не привязан кошелек Metamask.'},
                     status=HTTP_400_BAD_REQUEST)
             try:
-                admin_wallet = AdminWallet.objects.first()
+                admin_wallet = get_main_wallet()
             except Exception:
                 return Response(
                     {'error': 'Не существует кошелька главного аккаунта.'},
@@ -131,25 +132,10 @@ class FillUserReserveView(GenericAPIView):
                 amount=amount
                 )
 
-            user.balance += amount
+            user.balance += transaction.amount
             user.save()
-            admin_wallet.balance += amount
+            admin_wallet.balance += transaction.amount
             admin_wallet.save()
-
-            if user.balance > 651:
-                queue_object, created = QueueUser.objects.get_or_create(user=user)
-                print(QueueUser.objects.get_or_create(user=user))
-                print(1)
-                if created:
-                    print(2)
-                    print(QueueUser.objects.aggregate(Max('number')))
-                    max_value = QueueUser.objects.aggregate(Max('number'))
-                    if not max_value:
-                        queue_object.number = 1
-                    else:
-                        queue_object.number = max_value['number__max'] + 1
-                    queue_object.permanent = False
-                    queue_object.save()
 
             return Response({'status': 'success'})
 
@@ -176,7 +162,7 @@ class TakeOffUserReserveView(GenericAPIView):
             user = User.objects.get(email=request.user)
 
             try:
-                admin_wallet = AdminWallet.objects.first()
+                admin_wallet = get_main_wallet()
             except Exception:
                 return Response(
                     {'error': 'Не существует кошелька главного аккаунта.'},
@@ -192,7 +178,7 @@ class TakeOffUserReserveView(GenericAPIView):
 
             coin, _ = Coin.objects.get_or_create(name='BUSD', network='BEP20')
             amount = serializer.validated_data['amount']
-            commission=1.0
+            commission = 1.0
 
             if user.hold:
                 if user.balance < user.hold + amount + commission:
@@ -218,9 +204,9 @@ class TakeOffUserReserveView(GenericAPIView):
                 commission=commission
                 )
 
-            user.balance = user.balance - amount - commission
+            user.balance = user.balance - transaction.amount - transaction.commission
             user.save()
-            admin_wallet.balance = admin_wallet.balance - amount + commission
+            admin_wallet.balance = admin_wallet.balance - transaction.amount + transaction.commission
             admin_wallet.save()
 
             return Response({'status': 'success'})

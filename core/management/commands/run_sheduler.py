@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('Preparing scheduler')
         scheduler = BlockingScheduler(timezone=pytz.UTC)
-        cron = CronTrigger(hour='*', minute='*', second=5, timezone=pytz.UTC)
+        cron = CronTrigger(hour='*', minute='*', second='*', timezone=pytz.UTC)
         scheduler.add_job(periodically_run_job, cron)
         print('Start scheduler')
         scheduler.start()

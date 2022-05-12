@@ -148,36 +148,22 @@ class IDOUpdateView(UpdateAPIView):
             if instance.without_pay:
                 existed_users = IDOParticipant.objects.filter(
                                             ido=instance
-                                            )
-                print(1)
+                                        )
                 for existed_user in existed_users:
                     if existed_user.user not in users:
-                        delete_participant(existed_user, existed_user.allocation)
+                        existed_user.user.hold += existed_user.allocation
+                        existed_user.user.balance += 1.3 * existed_user.allocation
+                        existed_user.user.save()
+                        takeoff_admin_wallet(int(existed_user.allocation * 0.3))
+                        existed_user.delete()
 
-                ex_users = [existed_user.user for existed_user in existed_users]
+                ex_users = [ex_user.user for ex_user in existed_users]
 
-                print(2)
+                print(111)
+
                 if allocations:
                     for user, allocation in zip(users, allocations):
-                        if user in ex_users:
-                            ex_part= IDOParticipant.objects.get(
-                                                     ido=instance,
-                                                     user=user
-                                                )
-                            diff = allocation - ex_part.allocation
-                            if diff != 0:
-                                referal = count_referal_hold(user, diff)
-                                participate_ido(user, instance, allocation, True)
-                                takeoff_admin_wallet(int(diff * 0.3))
-                                if referal and user.inviter:
-                                    if diff > 0:
-                                        realize_ido_part_referal(user, referal)
-                                    else:
-                                        decline_ido_part_referal(user,
-                                                                 referal,
-                                                                 ex_part.date)
-                        else:
-                            print(5)
+                        if user not in ex_users:
                             referal = count_referal_hold(user, allocation)
                             participate_ido(user, instance, allocation, True)
                             fill_admin_wallet(int(allocation * 0.3))
@@ -185,16 +171,22 @@ class IDOUpdateView(UpdateAPIView):
                                 realize_ido_part_referal(user, referal)
                 else:
                     for user_ in users:
-                        print(6)
-                        referal = count_referal_hold(user_, instance.person_allocation)
-                        participate_ido(user_, instance, instance.person_allocation, True)
+                        referal = count_referal_hold(user_,
+                                                     instance.person_allocation)
+                        participate_ido(user_, instance,
+                                        instance.person_allocation,
+                                        True)
                         fill_admin_wallet(int(instance.person_allocation * 0.3))
                         if referal and user_.inviter:
                             realize_ido_part_referal(user_, referal)
 
             else:
                 for part in IDOParticipant.objects.filter(ido=instance):
-                    delete_participant(part, part.allocation)
+                    part.user.hold += part.allocation
+                    part.user.balance += 1.3 * part.allocation
+                    part.user.save()
+                    takeoff_admin_wallet(int(part.allocation * 0.3))
+                    part.delete()
 
             return Response(serializer.data,
                             status=HTTP_200_OK)
@@ -346,18 +338,15 @@ class AddUserQueue(GenericAPIView):
                     number = all_queues.aggregate(Max('number'))['number__max'] + 1
 
             try:
-                print(user, ido, permanent, number)
-
                 queues = QueueUser.objects.filter(ido=ido, number__gte=number)
-                print(queues)
                 if queues:
                     for q in queues:
                         q.number += 1
                         q.save()
                 QueueUser.objects.create(user=user,
-                                        ido=ido,
-                                        permanent=permanent,
-                                        number=number)
+                                         ido=ido,
+                                         permanent=permanent,
+                                         number=number)
 
             except Exception as e:
                 print(e)

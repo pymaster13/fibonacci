@@ -24,7 +24,7 @@ class ExchangeAdmin(admin.ModelAdmin):
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
-    list_display = ('address', 'balance')
+    list_display = ('address', 'coin', 'owner_admin')
 
 
 @admin.register(AdminWallet)

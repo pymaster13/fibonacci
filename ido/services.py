@@ -9,6 +9,8 @@ from account.exceptions import EmailValidationError, UserDoesNotExists
 from core.models import MetamaskWallet, Transaction
 from ido.models import IDOParticipant
 from core.models import AdminWallet
+from core.services import get_main_wallet
+
 
 User = get_user_model()
 
@@ -22,17 +24,6 @@ def process_ido_data(request_query_dict: dict):
     print('request data', data)
 
     tmp_data = {}
-
-    smartcontract = data.get('smartcontract')
-    if smartcontract:
-        smartcontract_obj, _ = Address.objects.get_or_create(
-                                            address=smartcontract
-                                            )
-        if IDO.objects.filter(smartcontract=smartcontract_obj):
-            raise SmartcontractAddError("Этот адрес смартконтракта уже зарегистрирован.")
-
-        smartcontract = smartcontract_obj.pk
-        tmp_data['smartcontract'] = smartcontract
 
     exchange = data.get('exchange')
     if exchange:
@@ -48,6 +39,18 @@ def process_ido_data(request_query_dict: dict):
             tmp_data['coin'] = coin_obj.pk
     except Exception:
         raise CoinAddError('Указаны неверные данные о монете.')
+
+    smartcontract = data.get('smartcontract')
+    if smartcontract:
+        smartcontract_obj, _ = Address.objects.get_or_create(
+                                            address=smartcontract,
+                                            coin=coin_obj
+                                            )
+        if IDO.objects.filter(smartcontract=smartcontract_obj):
+            raise SmartcontractAddError("Этот адрес смартконтракта уже зарегистрирован.")
+
+        smartcontract = smartcontract_obj.pk
+        tmp_data['smartcontract'] = smartcontract
 
     users_obj = []
     users = data.pop('users', [])
@@ -74,13 +77,13 @@ def process_ido_data(request_query_dict: dict):
 
 
 def fill_admin_wallet(amount: str):
-    admin_wallet = AdminWallet.objects.first()
+    admin_wallet = get_main_wallet()
     admin_wallet.balance += amount
     admin_wallet.save()
 
 
 def takeoff_admin_wallet(amount: str):
-    admin_wallet = AdminWallet.objects.first()
+    admin_wallet = get_main_wallet()
     admin_wallet.balance -= amount
     admin_wallet.save()
 

@@ -15,10 +15,12 @@ from account.services import verify_google_code
 from .exceptions import GrantPermissionsError
 from .models import VIPUser
 from .serializers import (PermissionsSerializer, LoginAdminSerializer,
-                          AddVIPUserSerializer, UserPrioritySerializer)
-from .services import (grant_permissions, refresh_queue_places, 
+                          AddVIPUserSerializer, UserPrioritySerializer,
+                          AdminCustomTokenWalletSerializer)
+from .services import (grant_permissions, refresh_queue_places,
                        retrieve_users_info)
 from ido.models import IDOParticipant, QueueUser
+from core.models import Address, AdminWallet
 
 
 User = get_user_model()
@@ -288,3 +290,36 @@ class RetrieveUsersInformationView(GenericAPIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+
+class CreateCustomTokenWalletView(GenericAPIView):
+    """API endpoint to create admin wallet with custom tokens."""
+
+    serializer_class = AdminCustomTokenWalletSerializer
+    permission_classes = (IsAdminUser,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        smrt, _ = Address.objects.get(address=data['smartcontract'])
+        new_admin_address = Address.objects.create(
+            address=data['wallet_address'],
+            coin=smrt.coin,
+            owner_admin=True
+        )
+
+        AdminWallet.objects.create(
+            wallet=new_admin_address,
+            decimal=data['decimal']
+        )
+
+        try:
+            return Response({'status': "success"})
+        except Exception as e:
+            print(e)
+            return Response({
+                "error": 'Ошибка создания кошелька с токенами.'},
+                status=HTTP_400_BAD_REQUEST)

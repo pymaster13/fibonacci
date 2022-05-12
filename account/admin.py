@@ -31,7 +31,7 @@ class UserAdmin(DjangoUserAdmin):
 
     list_display = ('id', 'email', 'telegram', 'first_name', 'last_name', 'line',
                     'is_active', 'is_staff', 'invite_code', 'can_invite',
-                    'status')
+                    'status', 'balance', 'inviter')
     search_fields = ('email', 'telegram')
     ordering = ('email', 'line', 'telegram')
 

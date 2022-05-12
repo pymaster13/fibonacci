@@ -91,3 +91,23 @@ class UserPrioritySerializer(EmailSerializer):
     """Serializer for setting user queue number."""
 
     number = serializers.IntegerField(required=False)
+
+
+class AdminCustomTokenWalletSerializer(EmailSerializer):
+    """Serializer for creating admin wallet with custom tokens."""
+
+    smartcontract = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Смартконтракт не может быть пустым."
+                            })
+    wallet_address = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Адрес не может быть пустым."
+                            })
+    decimal = serializers.FloatField(
+                        required=True,
+                        error_messages={
+                            'blank': "Множитель не может быть пустым."
+                            })

@@ -153,6 +153,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def as_json(self):
         summ = sum([i.allocation for i in self.idoparticipant_set.all()])
         return {
+            'id': self.id,
             'email': self.email,
             'fio': self.fio,
             'status': self.status,
