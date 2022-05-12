@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Max
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
                                    HTTP_200_OK)
 from rest_framework.generics import (GenericAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from knox.models import AuthToken
 
 from core.models import Address
+from ido.models import QueueUser
 from .exceptions import MetamaskWalletExistsError
 from .models import MetamaskWallet, AdminWallet, Coin, Transaction
 from .serializers import (MetamaskWalletSerializer, UserReserveSerializer)
@@ -112,7 +113,7 @@ class FillUserReserveView(GenericAPIView):
             except Exception:
                 return Response(
                     {'error': 'У пользователя не привязан кошелек Metamask.'},
-                     status=HTTP_400_BAD_REQUEST)
+                    status=HTTP_400_BAD_REQUEST)
             try:
                 admin_wallet = AdminWallet.objects.first()
             except Exception:
@@ -135,7 +136,22 @@ class FillUserReserveView(GenericAPIView):
             admin_wallet.balance += amount
             admin_wallet.save()
 
-            return Response({'status': 'successfull'})
+            if user.balance > 651:
+                queue_object, created = QueueUser.objects.get_or_create(user=user)
+                print(QueueUser.objects.get_or_create(user=user))
+                print(1)
+                if created:
+                    print(2)
+                    print(QueueUser.objects.aggregate(Max('number')))
+                    max_value = QueueUser.objects.aggregate(Max('number'))
+                    if not max_value:
+                        queue_object.number = 1
+                    else:
+                        queue_object.number = max_value['number__max'] + 1
+                    queue_object.permanent = False
+                    queue_object.save()
+
+            return Response({'status': 'success'})
 
         except Exception as e:
             print(e)
@@ -172,11 +188,17 @@ class TakeOffUserReserveView(GenericAPIView):
             except Exception:
                 return Response(
                     {'error': 'У пользователя не привязан кошелек Metamask.'},
-                     status=HTTP_400_BAD_REQUEST)
+                    status=HTTP_400_BAD_REQUEST)
 
             coin, _ = Coin.objects.get_or_create(name='BUSD', network='BEP20')
             amount = serializer.validated_data['amount']
             commission=1.0
+
+            if user.hold:
+                if user.balance < user.hold + amount + commission:
+                    return Response(
+                    {'error': 'У пользователя не достаточно средств для снятия из-за заморозки.'},
+                    status=HTTP_400_BAD_REQUEST)
 
             if user.balance < amount + commission or user.balance == commission:
                 return Response(
@@ -201,7 +223,7 @@ class TakeOffUserReserveView(GenericAPIView):
             admin_wallet.balance = admin_wallet.balance - amount + commission
             admin_wallet.save()
 
-            return Response({'status': 'successfull'})
+            return Response({'status': 'success'})
 
         except Exception as e:
             print(e)

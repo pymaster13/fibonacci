@@ -15,6 +15,13 @@ from .models import TgAccount
 User = get_user_model()
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', 'groups', 'user_permissions', 'hold',
+                   'permanent_place', 'last_login', 'is_staff')
+
+
 class ResetPasswordTokenSerializer(serializers.Serializer):
     """Serializer for checking token during change endpoint."""
 

@@ -1,3 +1,4 @@
+from re import X
 from django.contrib.auth import get_user_model
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser
@@ -15,7 +16,9 @@ from .exceptions import GrantPermissionsError
 from .models import VIPUser
 from .serializers import (PermissionsSerializer, LoginAdminSerializer,
                           AddVIPUserSerializer, UserPrioritySerializer)
-from .services import grant_permissions
+from .services import (grant_permissions, refresh_queue_places, 
+                       retrieve_users_info)
+from ido.models import IDOParticipant, QueueUser
 
 
 User = get_user_model()
@@ -53,7 +56,8 @@ class LoginAdminUserView(GenericAPIView):
                 "token": AuthToken.objects.create(admin)[1]
             })
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return Response({"error": 'Ошибка во время авторизации.'},
                             status=HTTP_400_BAD_REQUEST)
 
@@ -188,7 +192,7 @@ class DeleteVIPUserView(GenericAPIView):
                 status=HTTP_400_BAD_REQUEST)
 
 
-class SetUserPriorityView(GenericAPIView):
+class SetUserPermanentPlaceView(GenericAPIView):
     """API endpoint to set user priority."""
 
     serializer_class = UserPrioritySerializer
@@ -202,8 +206,85 @@ class SetUserPriorityView(GenericAPIView):
         except (EmailValidationError, UserDoesNotExists) as e:
             return Response({"error": str(e)})
 
-        user = User.objects.get(email=serializer.validated_data['email'])
-        user.priority = serializer.validated_data.get('priority', 0)
-        user.save()
+        data = serializer.validated_data
+        number = data.get('number', None)
 
-        return Response({'status': 'success'})
+        user = User.objects.get(email=data['email'])
+
+        if not number:
+            print(user.permanent_place)
+            if not user.permanent_place:
+                return Response(
+                    {"error": 'Пользователь не состоит в приоритетной очереди.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+
+            users = User.objects.filter(permanent_place__gt=user.permanent_place)
+            print(users)
+            for u in users:
+                u.permanent_place -= 1
+                u.save()
+
+            user.permanent_place = None
+            user.save()
+
+            refresh_queue_places(user)
+
+            return Response({'status': 'success'})
+
+        if number < 1:
+            return Response(
+                {"error": 'Номер в очереди не может быть меньше 1.'},
+                status=HTTP_400_BAD_REQUEST)
+
+        try:
+            users = User.objects.filter(permanent_place__gte=number)
+            for u in users:
+                u.permanent_place += 1
+                u.save()
+
+            user.permanent_place = number
+            user.save()
+            refresh_queue_places(user)
+
+            return Response({'status': 'success'})
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+
+class GetUserIDOView(GenericAPIView):
+    """API endpoint to get user ido's allocation."""
+
+    serializer_class = EmailSerializer
+    permission_classes = (IsAdminUser,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (EmailValidationError, UserDoesNotExists) as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        user = User.objects.get(email=serializer.validated_data['email'])
+
+        idos = IDOParticipant.objects.filter(user=user)
+        summ = sum([ido.allocation for ido in idos if ido.allocation])
+
+        return Response({'email': user.email, 'summ': summ})
+
+
+class RetrieveUsersInformationView(GenericAPIView):
+    """API endpoint to get users info."""
+
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request):
+        try:
+            users = User.objects.all().order_by('email')
+            data = retrieve_users_info(users)
+            return Response({'users': data}, status=HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)

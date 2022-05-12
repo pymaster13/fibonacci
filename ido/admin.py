@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import (IDO, ManuallyCharge, IDOParticipant)
+from .models import (IDO, ManuallyCharge, IDOParticipant, QueueUser)
 
 
 @admin.register(IDO)
@@ -15,5 +15,9 @@ class ManuallyChargeAdmin(admin.ModelAdmin):
 
 @admin.register(IDOParticipant)
 class IDOParticipantAdmin(admin.ModelAdmin):
-    list_display = ('ido', 'user', 'priority', 'allocation', 'queue_place',
-                    'date')
+    list_display = ('ido', 'user', 'allocation', 'date')
+
+
+@admin.register(QueueUser)
+class QueueUserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'ido', 'user', 'number', 'permanent', 'date')

@@ -1,4 +1,6 @@
+import queue
 from django.contrib.auth import get_user_model
+from django.db.models import Max
 from rest_framework.status import (HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN,
                                    HTTP_200_OK, HTTP_204_NO_CONTENT,
                                    HTTP_201_CREATED)
@@ -8,11 +10,15 @@ from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.models import AdminWallet, Coin, MetamaskWallet, Transaction
+
 from .exceptions import ExchangeAddError, IDOExistsError, AllocationError
-from .models import IDO, IDOParticipant, ManuallyCharge
-from .serializers import (IDOSerializer,
+from .models import IDO, IDOParticipant, ManuallyCharge, QueueUser
+from .serializers import (IDOSerializer, AddUserQueueSerializer,
                           ManuallyCharge, ParticipateIDOSerializer, PureIDOSerializer)
-from .services import process_ido_data
+from .services import (decline_ido_part_referal, delete_participant, process_ido_data, fill_admin_wallet,
+                       realize_ido_part_referal, participate_ido, takeoff_admin_wallet,
+                       count_referal_hold)
 
 User = get_user_model()
 
@@ -46,7 +52,7 @@ class IDOCreateView(CreateAPIView):
         if user.has_perm('ido.add_ido') or user.is_superuser:
 
             try:
-                data, users = process_ido_data(request.data)
+                data, users, allocations = process_ido_data(request.data)
             except Exception as e:
                 return Response(
                     {"error": str(e)},
@@ -57,18 +63,47 @@ class IDOCreateView(CreateAPIView):
 
             ido = IDO.objects.create(**serializer.validated_data)
 
-            if users and serializer.validated_data['without_pay']:
-                for u in users:
-                    try:
-                        IDOParticipant.objects.create(user=u,
-                                                      ido=ido)
-                    except Exception:
-                        return Response(
-                            {'error': 'Один из пользователей уже в очереди данного IDO.'},
+            if users and not serializer.validated_data['without_pay']:
+                ido.delete()
+                return Response(
+                            {'error': 'Поле "Без оплаты" неактивно.'},
                             status=HTTP_400_BAD_REQUEST
                         )
+
+            if users and serializer.validated_data['without_pay']:
+                try:
+                    if allocations:
+                        if sum(allocations) > ido.general_allocation:
+                            ido.delete()
+                            return Response(
+                                {'error': 'Аллокация пользователей превышает аллокацию проекта.'},
+                                status=HTTP_400_BAD_REQUEST
+                            )
+
+                        for user, allocation in zip(users, allocations):
+                            referal = count_referal_hold(user, allocation)
+                            participate_ido(user, ido, allocation)
+                            fill_admin_wallet(int(allocation * 0.3))
+                            if referal and user.inviter:
+                                realize_ido_part_referal(user, referal)
+                    else:
+                        for user_ in users:
+                            referal = count_referal_hold(user, ido.person_allocation)
+                            participate_ido(user_, ido, ido.person_allocation)
+                            fill_admin_wallet(int(ido.person_allocation * 0.3))
+                            if referal and user_.inviter:
+                                realize_ido_part_referal(user_, referal)
+                except Exception as e:
+                    print(e)
+                    ido.delete()
+                    return Response(
+                        {'error': str(e)},
+                        status=HTTP_400_BAD_REQUEST
+                    )
+
             return Response(serializer.data,
                             status=HTTP_201_CREATED)
+
         return Response({
                 "error": 'У пользователя нет прав на создание IDO.'
                 }, status=HTTP_403_FORBIDDEN)
@@ -89,16 +124,21 @@ class IDOUpdateView(UpdateAPIView):
             instance = self.get_object()
 
             try:
-                data, users = process_ido_data(request.data)
+                data, users, allocations = process_ido_data(request.data)
             except Exception as e:
                 return Response(
                     {"error": str(e)},
                     status=HTTP_400_BAD_REQUEST)
 
-            serializer = PureIDOSerializer(
-                instance,
-                data=data,
-                partial=partial)
+            if sum(allocations) > instance.general_allocation:
+                return Response(
+                    {'error': 'Аллокация пользователей превышает аллокацию проекта.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+
+            serializer = PureIDOSerializer(instance,
+                                           data=data,
+                                           partial=partial)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
 
@@ -109,14 +149,53 @@ class IDOUpdateView(UpdateAPIView):
                 existed_users = IDOParticipant.objects.filter(
                                             ido=instance
                                             )
+                print(1)
                 for existed_user in existed_users:
                     if existed_user.user not in users:
-                        existed_user.delete()
+                        delete_participant(existed_user, existed_user.allocation)
 
-                for u in users:
-                    user, _ = IDOParticipant.objects.get_or_create(
-                                                      user=u,
-                                                      ido=instance)
+                ex_users = [existed_user.user for existed_user in existed_users]
+
+                print(2)
+                if allocations:
+                    for user, allocation in zip(users, allocations):
+                        if user in ex_users:
+                            ex_part= IDOParticipant.objects.get(
+                                                     ido=instance,
+                                                     user=user
+                                                )
+                            diff = allocation - ex_part.allocation
+                            if diff != 0:
+                                referal = count_referal_hold(user, diff)
+                                participate_ido(user, instance, allocation, True)
+                                takeoff_admin_wallet(int(diff * 0.3))
+                                if referal and user.inviter:
+                                    if diff > 0:
+                                        realize_ido_part_referal(user, referal)
+                                    else:
+                                        decline_ido_part_referal(user,
+                                                                 referal,
+                                                                 ex_part.date)
+                        else:
+                            print(5)
+                            referal = count_referal_hold(user, allocation)
+                            participate_ido(user, instance, allocation, True)
+                            fill_admin_wallet(int(allocation * 0.3))
+                            if referal and user.inviter:
+                                realize_ido_part_referal(user, referal)
+                else:
+                    for user_ in users:
+                        print(6)
+                        referal = count_referal_hold(user_, instance.person_allocation)
+                        participate_ido(user_, instance, instance.person_allocation, True)
+                        fill_admin_wallet(int(instance.person_allocation * 0.3))
+                        if referal and user_.inviter:
+                            realize_ido_part_referal(user_, referal)
+
+            else:
+                for part in IDOParticipant.objects.filter(ido=instance):
+                    delete_participant(part, part.allocation)
+
             return Response(serializer.data,
                             status=HTTP_200_OK)
 
@@ -138,6 +217,11 @@ class IDODeleteView(DestroyAPIView):
         if user.has_perm('ido.delete_ido') or user.is_superuser:
             instance = self.get_object()
             self.perform_destroy(instance)
+
+            for part in IDOParticipant.objects.filter(ido=instance):
+                part.user.hold += part.allocation
+                part.user.save()
+                part.delete()
             return Response(status=HTTP_204_NO_CONTENT)
 
         return Response({
@@ -156,6 +240,74 @@ class ParticipateIDOView(GenericAPIView):
 
         try:
             serializer.is_valid(raise_exception=True)
+            user = User.objects.get(email=request.user)
+
+            ido = serializer.validated_data
+
+            if user.balance < 651 or user.balance < 1.3 * ido.person_allocation + 1:
+                return Response(
+                    {'error': 'У пользователя недостаточно средств на счете.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+
+            try:
+                queue_object = QueueUser.objects.get(ido=ido, user=user)
+                if queue_object.number > ido.count_participants:
+                    return Response(
+                        {'error': 'Место в очереди не позволяет Вам участововать в данном IDO.'},
+                        status=HTTP_400_BAD_REQUEST
+                    )
+            except Exception:
+                return Response(
+                        {'error': 'Вы не находитесь в очереди на участие в IDO.'},
+                        status=HTTP_400_BAD_REQUEST
+                    )
+
+            participants = IDOParticipant.objects.filter(ido=ido)
+            used_allocation = len(participants) * ido.person_allocation
+
+            referal = count_referal_hold(user, ido.person_allocation)
+
+            if ido.general_allocation - used_allocation >= ido.person_allocation:
+                try:
+                    participate_ido(user, ido, ido.person_allocation)
+
+                except Exception as e:
+                    print(e)
+                    return Response(
+                        {'error': 'Вы уже участвуете в данном IDO.'},
+                        status=HTTP_400_BAD_REQUEST
+                    )
+
+                else:
+                    fill_admin_wallet(int(ido.person_allocation * 0.3))
+
+                    if referal and user.inviter:
+                        realize_ido_part_referal(user, referal)
+
+                    return Response({'status': 'success'})
+
+            else:
+                return Response(
+                        {'error': 'К сожалению, вся аллокация IDO уже распределена.'},
+                        status=HTTP_400_BAD_REQUEST
+                    )
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
+
+class AddUserQueue(GenericAPIView):
+    """API endpoint to add user to IDO queue."""
+
+    serializer_class = AddUserQueueSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
 
             user = User.objects.get(email=request.user)
 
@@ -165,7 +317,7 @@ class ParticipateIDOView(GenericAPIView):
                     status=HTTP_400_BAD_REQUEST
                     )
 
-            ido, allocation = serializer.validated_data
+            ido = serializer.validated_data
 
             if ido.without_pay:
                 return Response(
@@ -174,12 +326,43 @@ class ParticipateIDOView(GenericAPIView):
                     )
 
             try:
-                IDOParticipant.objects.create(user=user,
-                                              ido=ido,
-                                              allocation=allocation)
-            except Exception:
+                QueueUser.objects.get(user=user, ido=ido)
                 return Response(
                     {'error': 'Пользователь уже в очереди данного IDO.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+            except:
+                pass
+
+            if user.permanent_place:
+                permanent = True
+                number = user.permanent_place
+            else:
+                permanent = False
+                all_queues = QueueUser.objects.filter(ido=ido)
+                if not all_queues:
+                    number = 1
+                else:
+                    number = all_queues.aggregate(Max('number'))['number__max'] + 1
+
+            try:
+                print(user, ido, permanent, number)
+
+                queues = QueueUser.objects.filter(ido=ido, number__gte=number)
+                print(queues)
+                if queues:
+                    for q in queues:
+                        q.number += 1
+                        q.save()
+                QueueUser.objects.create(user=user,
+                                        ido=ido,
+                                        permanent=permanent,
+                                        number=number)
+
+            except Exception as e:
+                print(e)
+                return Response(
+                    {'error': 'Ошибка при добавлении пользователя в очередь IDO.'},
                     status=HTTP_400_BAD_REQUEST
                     )
             else:

@@ -6,6 +6,9 @@ from .models import Address, Exchange, Coin, IDO
 from .exceptions import (ExchangeAddError, SmartcontractAddError,
                          CoinAddError)
 from account.exceptions import EmailValidationError, UserDoesNotExists
+from core.models import MetamaskWallet, Transaction
+from ido.models import IDOParticipant
+from core.models import AdminWallet
 
 User = get_user_model()
 
@@ -62,8 +65,105 @@ def process_ido_data(request_query_dict: dict):
                     )
             users_obj.append(user)
 
+    allocations = data.pop('allocations', [])
     data.update(tmp_data)
 
     print('result data', data)
 
-    return data, users_obj
+    return data, users_obj, allocations
+
+
+def fill_admin_wallet(amount: str):
+    admin_wallet = AdminWallet.objects.first()
+    admin_wallet.balance += amount
+    admin_wallet.save()
+
+
+def takeoff_admin_wallet(amount: str):
+    admin_wallet = AdminWallet.objects.first()
+    admin_wallet.balance -= amount
+    admin_wallet.save()
+
+
+def realize_ido_part_referal(user: User, referal: float):
+    user.inviter.balance += referal
+    user.inviter.save()
+    coin, _ = Coin.objects.get_or_create(name='BUSD',
+                                         network='BEP20')
+    metamask_from = MetamaskWallet.objects.get(user=user)
+    metamask_to = MetamaskWallet.objects.get(user=user.inviter)
+    Transaction.objects.create(
+                    address_from=metamask_from.wallet_address,
+                    address_to=metamask_to.wallet_address,
+                    coin=coin,
+                    amount=referal
+    )
+
+
+def decline_ido_part_referal(user: User, referal, date):
+    print(user, referal, date)
+    user.inviter.balance -= referal
+    user.inviter.save()
+    coin, _ = Coin.objects.get_or_create(name='BUSD',
+                                         network='BEP20')
+    metamask_from = MetamaskWallet.objects.get(user=user)
+    metamask_to = MetamaskWallet.objects.get(user=user.inviter)
+    for t in Transaction.objects.filter(
+                    address_from=metamask_from.wallet_address,
+                    address_to=metamask_to.wallet_address,
+                    coin=coin):
+        print(t.date)
+        diff = t.date - date
+        if diff.total_seconds() < 0.5:
+            print(diff.total_seconds())
+            t.delete()
+            break
+
+
+def participate_ido(user: User, ido: IDO, allocation, wo_pay=False):
+
+    print('shit')
+    print(user, ido, allocation)
+
+    participant, _ = IDOParticipant.objects.get_or_create(
+                                        user=user,
+                                        ido=ido)
+    participant.allocation = allocation
+    participant.save()
+    if not wo_pay:
+        user.balance -= 1.3 * allocation
+    if user.hold:
+        if user.hold <= 1.3 * allocation:
+            user.hold = 0
+        elif user.hold > 1.3 * allocation:
+            user.hold -= 1.3 * allocation
+    user.can_invite = True
+    print(11)
+    user.status = 'A'
+    user.save()
+    print(22)
+
+
+def count_referal_hold(user: User, allocation):
+    if user.hold:
+        if allocation > user.hold:
+            referal = (allocation - user.hold) * 0.05
+            user.hold = 0
+        else:
+            referal = 0
+            user.hold -= allocation
+    else:
+        referal = allocation * 0.05
+    return referal
+
+
+def delete_participant(participant, allocation):
+    referal = count_referal_hold(participant.user,
+                                 allocation)
+    referal = (allocation - user.hold) * 0.05
+    takeoff_admin_wallet(int(allocation * 0.3))
+    if referal and participant.user.inviter:
+        decline_ido_part_referal(participant.user,
+                                 referal, participant.date)
+    participant.user.balance += 1.3 * allocation
+    participant.delete()

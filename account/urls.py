@@ -5,7 +5,8 @@ from .views import (GetTgCodeView, RegisterUserView, LoginUserView,
                     ConfirmTgAccountView, ResetPasswordView,
                     CheckResetTokenView, ChangeUserPasswordView,
                     GenerateGoogleQRView, VerifyGoogleCodeView,
-                    RetrievePermissionsView)
+                    RetrievePermissionsView, RetrieveUserInfoView,
+                    RetrieveUserPartnersView)
 
 
 urlpatterns = [
@@ -24,6 +25,8 @@ urlpatterns = [
 
     # User permissions
     path('retrieve_permissions/', RetrievePermissionsView.as_view(), name='retrieve_permissions'),
+    path('retrieve_partners/', RetrieveUserPartnersView.as_view(), name='retrieve_partners'),
+    path('info/', RetrieveUserInfoView.as_view(), name='info'),
 
     # Reset user password
     path('reset_password_confirm/', CheckResetTokenView.as_view(), name='reset_password_confirm'),

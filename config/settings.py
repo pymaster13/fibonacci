@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'knox',
     'drf_spectacular',  # Swagger UI
+    'django_dramatiq',
 
     'account',
     'administrator',
@@ -126,6 +127,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER',
@@ -137,3 +139,30 @@ EMAIL_USE_SSL = False
 
 COINMARKETCAP_API_KEY = os.getenv('COINMARKETCAP_API_KEY',
                                   'cc32eb41-1867-478f-8610-75592817a613')
+
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.redis.RedisBroker",
+    "OPTIONS": {
+        "url": "redis://localhost:6379",
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.Prometheus",
+        "dramatiq.middleware.AgeLimit",
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Callbacks",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+        "core.custom_middleware.AntiScheduleMiddleware"
+    ]
+}
+
+DRAMATIQ_RESULT_BACKEND = {
+    "BACKEND": "dramatiq.results.backends.redis.RedisBackend",
+    "BACKEND_OPTIONS": {
+        "url": "redis://localhost:6379",
+    },
+    "MIDDLEWARE_OPTIONS": {
+        "result_ttl": 60000
+    }
+}

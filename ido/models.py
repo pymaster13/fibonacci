@@ -73,6 +73,10 @@ class IDO(models.Model):
     class Meta:
         verbose_name_plural = "IDO"
 
+    @property
+    def count_participants(self):
+        return self.general_allocation // self.person_allocation
+
 
 class ManuallyCharge(models.Model):
     """Model of manually charges of coins (IDO.without_pay=True).
@@ -106,11 +110,27 @@ class IDOParticipant(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              verbose_name='User')
-    priority = models.IntegerField(default=0, verbose_name='Priority')
     allocation = models.FloatField(null=True, verbose_name='Allocation')
-
-    queue_place = models.IntegerField(null=True, verbose_name='Queue place')
     date = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('ido', 'user')
+
+
+class QueueUser(models.Model):
+    """Model of user queue."""
+
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             verbose_name='User')
+    ido = models.ForeignKey(IDO, default=None, null=True,
+                            on_delete=models.CASCADE,
+                            verbose_name='IDO')
+    number = models.IntegerField(default=0, verbose_name='Number (place)')
+    permanent = models.BooleanField(default=False, verbose_name='Permanent')
+    date = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('ido', 'user')

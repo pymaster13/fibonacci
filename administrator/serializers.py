@@ -88,6 +88,6 @@ class AddVIPUserSerializer(EmailSerializer):
 
 
 class UserPrioritySerializer(EmailSerializer):
-    """Serializer for setting user priority."""
+    """Serializer for setting user queue number."""
 
-    priority = serializers.IntegerField(required=False)
+    number = serializers.IntegerField(required=False)

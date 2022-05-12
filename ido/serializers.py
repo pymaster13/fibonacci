@@ -22,6 +22,9 @@ class IDOSerializer(serializers.ModelSerializer):
     users = serializers.ListField(
                         child=serializers.CharField(),
                         required=False)
+    allocations = serializers.ListField(
+                        child=serializers.FloatField(),
+                        required=False)
 
     class Meta:
         model = IDO
@@ -41,7 +44,23 @@ class ParticipateIDOSerializer(serializers.Serializer):
                     error_messages={
                         'blank': "IDO не может быть пустым."
                         })
-    allocation = serializers.FloatField(required=False)
+
+    def validate(self, attrs):
+        try:
+            ido = IDO.objects.get(pk=attrs['ido'])
+        except Exception:
+            raise IDOExistsError('Указан некорректный идентификатор IDO.')
+
+        return ido
+
+
+class AddUserQueueSerializer(serializers.Serializer):
+
+    ido = serializers.IntegerField(
+                    required=True,
+                    error_messages={
+                        'blank': "IDO не может быть пустым."
+                        })
 
     def validate(self, attrs):
         try:
@@ -52,4 +71,4 @@ class ParticipateIDOSerializer(serializers.Serializer):
         if attrs.get('allocation', 0) < 0:
             raise AllocationError('Аллокация не может быть отрицательной.')
 
-        return ido, attrs.get('allocation', None)
+        return ido

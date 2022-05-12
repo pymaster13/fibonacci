@@ -64,8 +64,9 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 blank=True,
                                 null=True)
     balance = models.FloatField(default=0.0)
-    priority = models.IntegerField(default=0, verbose_name='Priority')
     line = models.IntegerField(default=1)
+    permanent_place = models.IntegerField(null=True)
+    hold = models.FloatField(default=0.0)
 
     STATUSES = [
         ('A', 'Active'),
@@ -114,27 +115,52 @@ class User(AbstractBaseUser, PermissionsMixin):
                                                    to_check, active,
                                                    passive, nonactive)
 
-        return {'partners': partners, 'stats': {
-                                                'active': active,
-                                                'passive': passive,
-                                                'nonactive': nonactive,
-                                                }
+        return {'partners': partners,
+                'stats': {
+                            'active': active,
+                            'passive': passive,
+                            'nonactive': nonactive,
+                            }
                 }
 
     @property
     def partners(self):
         partners = User.retrieve_all_user_partners(self)
-
         return partners
 
+    @property
+    def fio(self):
+        if self.last_name:
+            last_name = self.last_name.lower().capitalize()
+        else:
+            last_name = ''
+        if self.first_name:
+            first_name = self.first_name.lower().capitalize()[:1]
+        else:
+            first_name = ''
+        return f'{last_name} {first_name}.'
+
+    @property
+    def full_status(self):
+        if self.status == 'A':
+            full_status = 'Активный партнер'
+        elif self.status == 'P':
+            full_status = 'Пассивный партнер'
+        else:
+            full_status = 'Неактивный партнер'
+        return full_status
+
     def as_json(self):
+        summ = sum([i.allocation for i in self.idoparticipant_set.all()])
         return {
             'email': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
+            'fio': self.fio,
+            'status': self.status,
             'telegram': self.telegram.tg_nickname,
             'balance': self.balance,
             'line': self.line,
+            'referal': self.partners,
+            'ido': summ if summ else 0
         }
 
 

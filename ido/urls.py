@@ -1,7 +1,8 @@
 from django.urls import path
 
 from .views import (IDOCreateView, IDOUpdateView, IDODeleteView,
-                    IDORetrieveView, IDOListView, ParticipateIDOView)
+                    IDORetrieveView, IDOListView, ParticipateIDOView,
+                    AddUserQueue)
 
 
 urlpatterns = [
@@ -10,6 +11,7 @@ urlpatterns = [
     path('delete/<int:pk>/', IDODeleteView.as_view(), name='delete_ido'),
     path('<int:pk>/', IDORetrieveView.as_view(), name='retrieve_ido'),
 
+    path('attach_to_queue/', AddUserQueue.as_view(), name='attach_to_queue'),
     path('participate/', ParticipateIDOView.as_view(), name='participate_ido'),
 
     path('', IDOListView.as_view(), name='list_ido'),

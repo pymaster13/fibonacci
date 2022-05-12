@@ -9,11 +9,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         bsc = 'https://bsc-dataseed.binance.org/'
         web3 = Web3(Web3.HTTPProvider(bsc))
-        print('connected', web3.isConnected())
+        # print('connected', web3.isConnected())
 
-        address = '0xDC497fBAbe657add9fd5Bd3FacBC64445c5A0fBC'
-        balance = web3.eth.get_balance(address)
-        print('my balance', balance)
+        # address = '0xDC497fBAbe657add9fd5Bd3FacBC64445c5A0fBC'
+        # balance = web3.eth.get_balance(address)
+        # print('my balance', balance)
 
         url_eth = 'https://api.bscscan.com/api'
         TokenAddress = '0x844fa82f1e54824655470970f7004dd90546bb28'
@@ -25,6 +25,7 @@ class Command(BaseCommand):
         abi = json.loads(response['result'])
 
         contract = web3.eth.contract(address=contract_address, abi=abi)
+        print(contract.functions.storedValue().call())
         totalSupply = contract.functions.totalSupply().call()
         print(totalSupply)
         print(contract.functions.name().call())

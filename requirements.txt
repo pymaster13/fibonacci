@@ -1,5 +1,6 @@
 aiohttp==3.8.1
 aiosignal==1.2.0
+APScheduler==3.9.1
 asgiref==3.5.1
 async-timeout==4.0.2
 attrs==21.4.0
@@ -13,8 +14,10 @@ cytoolz==0.11.2
 defusedxml==0.7.1
 Django==4.0.4
 django-cors-headers==3.11.0
+django-dramatiq==0.10.0
 django-rest-knox==4.2.0
 djangorestframework==3.13.1
+dramatiq==1.13.0
 drf-spectacular==0.22.1
 eth-abi==2.1.1
 eth-account==0.5.7
@@ -38,6 +41,7 @@ oauthlib==3.2.0
 onetimepass==1.0.1
 parsimonious==0.8.1
 Pillow==9.1.0
+prometheus-client==0.14.1
 protobuf==3.20.1
 pycparser==2.21
 pycryptodome==3.14.1
@@ -48,6 +52,7 @@ python-dotenv==0.20.0
 python-u2flib-server==5.0.1
 python3-openid==3.2.0
 pytz==2022.1
+pytz-deprecation-shim==0.1.0.post0
 PyYAML==6.0
 qrcode==7.3.1
 requests==2.27.1
@@ -56,6 +61,8 @@ rlp==2.0.1
 six==1.16.0
 sqlparse==0.4.2
 toolz==0.11.2
+tzdata==2022.1
+tzlocal==4.2
 uritemplate==4.1.1
 urllib3==1.26.9
 varint==1.0.2

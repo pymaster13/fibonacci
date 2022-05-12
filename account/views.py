@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token as ResetPasswordToken
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
                                    HTTP_200_OK)
 from knox.models import AuthToken
 import pyotp
+from yaml import serialize
 
 from .exceptions import (LoginUserError, EmailValidationError,
                          TgAccountVerifyError, InviterUserError,
@@ -16,10 +17,12 @@ from .models import TgAccount, TgCode, GoogleAuth
 from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           TgAccountSerializer, TgAccountCodeSerializer,
                           EmailSerializer, ChangePasswordSerializer,
-                          ResetPasswordTokenSerializer, GoogleCodeSerializer)
+                          ResetPasswordTokenSerializer, GoogleCodeSerializer,
+                          UserSerializer)
 from .services import (generate_code, check_code_time,
                        verify_google_code, send_mail_message,
                        generate_google_qrcode, retrieve_permissions)
+from administrator.services import retrieve_users_info
 
 
 User = get_user_model()
@@ -328,3 +331,32 @@ class RetrievePermissionsView(GenericAPIView):
         else:
             return Response({'user': user.email,
                              'permissions': list(permissions)})
+
+
+class RetrieveUserInfoView(GenericAPIView):
+    """API endpoint to retrieve user info."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+        serializer = self.get_serializer(user)
+
+        return Response(serializer.data, status=HTTP_200_OK)
+
+
+class RetrieveUserPartnersView(GenericAPIView):
+    """API endpoint to retrieve info about user partners."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def get(self, request):
+        try:
+            user = User.objects.get(email=request.user)
+            data = retrieve_users_info([user])
+            return Response({'users': data}, status=HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)

@@ -1,6 +1,12 @@
 ﻿from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
+from django.db.models import Max
 
 from .exceptions import GrantPermissionsError
+from ido.models import QueueUser, IDOParticipant
+
+
+User = get_user_model()
 
 
 def grant_permissions(user, perms):
@@ -36,3 +42,85 @@ def grant_permissions(user, perms):
     except Exception as e:
         print(e)
         raise GrantPermissionsError("Ошибка предоставления прав пользователю.")
+
+
+def refresh_queue_places(user):
+    """Help function to refresh all queues places
+       during set him place by admin"""
+    print('user', user)
+    queues = QueueUser.objects.filter(user=user)
+    print(queues)
+    if queues:
+        for queue in queues:
+            print('queue', queue)
+            if not user.permanent_place:
+                if queue.permanent and queue.is_active:
+                    print('reset')
+                    queue.permanent = False
+                    ido = queue.ido
+
+                    # Up all lower users with early date and permanent
+                    low_queues = QueueUser.objects.filter(
+                                    ido=ido,
+                                    number__gt=queue.number)
+                    print(low_queues)
+
+                    for q in low_queues:
+                        if q.permanent or q.date < queue.date:
+                            q.number -= 1
+                            q.save()
+
+                    # Calculating new number
+                    low_queues_ = QueueUser.objects.filter(
+                                    ido=ido,
+                                    permanent=False,
+                                    date__gte=queue.date).order_by('number')
+                    if low_queues_:
+                        new_number = low_queues_[0].number - 1
+                        queue.number = new_number
+                    else:
+                        all_queues = QueueUser.objects.filter(ido=ido)
+                        print('all', all_queues)
+                        if len(all_queues) > 1:
+                            print('len > 1')
+                            new_number = all_queues.aggregate(Max('number'))
+                            print(new_number)
+                            queue.number = new_number['number__max'] + 1
+
+                    queue.save()
+            else:
+                if not queue.permanent and queue.is_active:
+                    print('new')
+                    queue.permanent = True
+                    queue.number = user.permanent_place
+                    ido = queue.ido
+
+                    # Down all lower users
+                    low_queues = QueueUser.objects.filter(
+                                    ido=ido,
+                                    number__gte=user.permanent_place)
+
+                    for q in low_queues:
+                        if q == user:
+                            break
+                        q.number += 1
+                        q.save()
+
+                    queue.save()
+
+
+def retrieve_users_info(users: list, data: dict = {}):
+    for user in users:
+        user_data = {}
+        user_data['line'] = user.line
+        user_data['fio'] = user.fio
+        user_data['status'] = user.full_status
+        user_data['referal'] = user.partners
+
+        idos = IDOParticipant.objects.filter(user=user)
+        summ = sum([ido.allocation for ido in idos if ido.allocation])
+
+        user_data['ido'] = summ if summ else 0
+
+        data[user.email] = user_data
+    return data
