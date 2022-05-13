@@ -12,7 +12,7 @@ class MetamaskWalletAdmin(admin.ModelAdmin):
 
 @admin.register(Coin)
 class CoinAdmin(admin.ModelAdmin):
-    list_display = ('name', 'network')
+    list_display = ('name', 'network', 'cost_in_busd')
     ordering = ('name',)
 
 

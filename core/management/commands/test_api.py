@@ -2,37 +2,76 @@
 from web3 import Web3
 import time, json
 import requests
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+import json
+from json.decoder import JSONDecodeError
+
+from pprint import pprint
+
+from core.models import Coin, Address, AdminWallet, MetamaskWallet, Transaction
+from ido.models import IDO, IDOParticipant
+
+from config.settings import COINMARKETCAP_API_KEY
+
 
 class Command(BaseCommand):
     help = 'Test API'
 
     def handle(self, *args, **options):
+    # def retreive_coins_cost():
 
-        bsc = 'https://bsc-dataseed.binance.org/'
-        web3 = Web3(Web3.HTTPProvider(bsc))
+        coins = Coin.objects.all().exclude(name='BUSD')
 
-        print('connected', web3.isConnected())
+        for coin in coins:
+            flag = False
 
-        address = '0xDC497fBAbe657add9fd5Bd3FacBC64445c5A0fBC'
-        balance = web3.eth.get_balance(address)
-        print('my balance', balance)
+            for i in range(1, 1000):
+                time.sleep(1)
+                print(coin.name)
+                print(i)
+                if flag:
+                    break
 
-        url_eth = 'https://api.bscscan.com/api'
-        TokenAddress = '0x844fa82f1e54824655470970f7004dd90546bb28'
-        contract_address = web3.toChecksumAddress(TokenAddress)
-        print(contract_address)
-        API_ENDPOINT = f'{url_eth}?module=contract&action=getabi&address={str(contract_address)}'
-        r = requests.get(url = API_ENDPOINT)
-        response = r.json()
-        abi = json.loads(response['result'])
+                url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+                parameters = {
+                    'start': i ,
+                    'limit': '5000',
+                    'convert': 'USD',
+                }
 
-        contract = web3.eth.contract(address=contract_address, abi=abi)
-        print(contract.functions.storedValue().call())
-        totalSupply = contract.functions.totalSupply().call()
-        print(totalSupply)
-        print(contract.functions.name().call())
-        print(contract.functions.symbol().call())
-        address = web3.toChecksumAddress(address)
-        balance = contract.functions.balanceOf(address).call()
-        print(web3.fromWei(balance, 'ether'))
+                headers = {
+                'Accepts': 'application/json',
+                'X-CMC_PRO_API_KEY': COINMARKETCAP_API_KEY,
+                }
 
+                session = Session()
+                session.headers.update(headers)
+
+                try:
+                    response = session.get(url, params=parameters)
+                    data = json.loads(response.text)
+                    # pprint(data)
+
+                    if data.get('status'):
+                        if data['status'].get('error_code'):
+                            pprint(data)
+                            print(data['status'].get('error_code'))
+                            flag = True
+                            break
+
+                    for key, val in data.items():
+                        if key == 'data':
+                            for item in val:
+                                if item['symbol'] == coin.name:
+                                    print(item['symbol'])
+                                    print(item['quote']['USD']['price'])
+                                    coin.cost_in_busd = item['quote']['USD']['price']
+                                    coin.save()
+                                    flag = True
+                                    break
+
+                except (ConnectionError, Timeout, TooManyRedirects, JSONDecodeError) as e:
+                    print(e)
+                    flag = True
+                    break

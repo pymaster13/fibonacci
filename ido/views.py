@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from core.models import AdminWallet, Coin, MetamaskWallet, Transaction
 
 from .exceptions import ExchangeAddError, IDOExistsError, AllocationError
-from .models import IDO, IDOParticipant, ManuallyCharge, QueueUser
+from .models import IDO, IDOParticipant, QueueUser
 from .serializers import (IDOSerializer, AddUserQueueSerializer,
-                          ManuallyCharge, ParticipateIDOSerializer, PureIDOSerializer)
+                          ParticipateIDOSerializer, PureIDOSerializer)
 from .services import (decline_ido_part_referal, delete_participant, process_ido_data, fill_admin_wallet,
                        realize_ido_part_referal, participate_ido, takeoff_admin_wallet,
                        count_referal_hold)

@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from config.settings import AUTH_USER_MODEL
 
-
-User = get_user_model()
+# User = get_user_model()
+User = AUTH_USER_MODEL
 
 
 class Coin(models.Model):
@@ -14,6 +15,8 @@ class Coin(models.Model):
     network = models.CharField(max_length=128,
                                unique=True,
                                verbose_name='Coin network')
+    cost_in_busd = models.FloatField(null=True, blank=True,
+                                     verbose_name='BUSD cost')
 
     def __str__(self):
         return self.name
@@ -23,13 +26,15 @@ class Address(models.Model):
     """Model of address for metamask or smartcontract."""
 
     address = models.CharField(max_length=128,
-                               unique=True,
                                verbose_name='Address')
-    coin = models.OneToOneField(Coin,
-                                on_delete=models.CASCADE,
-                                null=True,
-                                blank=True)
+    coin = models.ForeignKey(Coin,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
     owner_admin = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('address', 'coin')
 
     def __str__(self):
         return self.address
@@ -52,8 +57,9 @@ class AdminWallet(models.Model):
 
     wallet_address = models.ForeignKey(Address, on_delete=models.CASCADE,
                                        verbose_name='Admin wallet address')
-    balance = models.FloatField(default=0, verbose_name='Admin wallet balance')
-    decimal = models.FloatField(default=0, verbose_name='Admin wallet decimal')
+    balance = models.DecimalField(null=True, blank=True, max_digits=100,
+                                  decimal_places=50, verbose_name='Admin wallet balance')
+    decimal = models.IntegerField(default=0, verbose_name='Admin wallet decimal')
 
     def __str__(self):
         return self.wallet_address.address
@@ -84,9 +90,12 @@ class Transaction(models.Model):
     coin = models.ForeignKey(Coin,
                              on_delete=models.CASCADE,
                              verbose_name='Transaction coin')
-    amount = models.FloatField(verbose_name='Transaction amount (volume)')
-    commission = models.FloatField(default=0,
-                                   verbose_name='Transaction commission')
+    amount = models.DecimalField(null=True, blank=True, max_digits=100,
+                                 decimal_places=50,
+                                 verbose_name='Transaction amount (volume)')
+    commission = models.DecimalField(null=True, blank=True, max_digits=100,
+                                     decimal_places=50,
+                                     verbose_name='Transaction commission')
     referal = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
 

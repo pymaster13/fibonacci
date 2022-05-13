@@ -304,15 +304,17 @@ class CreateCustomTokenWalletView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        smrt, _ = Address.objects.get(address=data['smartcontract'])
+        smrt = Address.objects.get(address=data['smartcontract'])
+        print(smrt)
         new_admin_address = Address.objects.create(
             address=data['wallet_address'],
             coin=smrt.coin,
             owner_admin=True
         )
+        print(new_admin_address)
 
         AdminWallet.objects.create(
-            wallet=new_admin_address,
+            wallet_address=new_admin_address,
             decimal=data['decimal']
         )
 

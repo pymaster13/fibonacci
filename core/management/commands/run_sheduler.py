@@ -4,7 +4,11 @@ import pytz
 
 from apscheduler.triggers.cron import CronTrigger
 
-from core.periodic_tasks import periodically_run_job
+from core.periodic_tasks import (periodically_run_job,
+                                periodically_run_job_2)
+
+
+scheduler = BlockingScheduler(timezone=pytz.UTC)
 
 
 class Command(BaseCommand):
@@ -12,8 +16,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print('Preparing scheduler')
-        scheduler = BlockingScheduler(timezone=pytz.UTC)
-        cron = CronTrigger(hour='*', minute='*', second='*', timezone=pytz.UTC)
+
+        cron = CronTrigger(hour='*', minute='*', second=1, timezone=pytz.UTC)
         scheduler.add_job(periodically_run_job, cron)
+        scheduler.add_job(periodically_run_job_2, cron)
         print('Start scheduler')
         scheduler.start()

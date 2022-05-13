@@ -18,6 +18,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    'django_dramatiq',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,7 +32,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'knox',
     'drf_spectacular',  # Swagger UI
-    'django_dramatiq',
 
     'account',
     'administrator',
@@ -153,7 +154,6 @@ DRAMATIQ_BROKER = {
         "dramatiq.middleware.Retries",
         "django_dramatiq.middleware.DbConnectionsMiddleware",
         "django_dramatiq.middleware.AdminMiddleware",
-        "core.custom_middleware.AntiScheduleMiddleware"
     ]
 }
 

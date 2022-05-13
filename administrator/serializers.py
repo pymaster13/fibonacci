@@ -1,6 +1,7 @@
 ﻿from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from eth_typing import Address
 from rest_framework import serializers
 
 from account.exceptions import (EmailValidationError, LoginUserError,
@@ -93,7 +94,7 @@ class UserPrioritySerializer(EmailSerializer):
     number = serializers.IntegerField(required=False)
 
 
-class AdminCustomTokenWalletSerializer(EmailSerializer):
+class AdminCustomTokenWalletSerializer(serializers.Serializer):
     """Serializer for creating admin wallet with custom tokens."""
 
     smartcontract = serializers.CharField(

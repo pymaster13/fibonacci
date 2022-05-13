@@ -125,9 +125,6 @@ def decline_ido_part_referal(user: User, referal, date):
 
 def participate_ido(user: User, ido: IDO, allocation, wo_pay=False):
 
-    print('shit')
-    print(user, ido, allocation)
-
     participant, _ = IDOParticipant.objects.get_or_create(
                                         user=user,
                                         ido=ido)
@@ -141,10 +138,7 @@ def participate_ido(user: User, ido: IDO, allocation, wo_pay=False):
         elif user.hold > 1.3 * allocation:
             user.hold -= 1.3 * allocation
     user.can_invite = True
-    print(11)
     user.status = 'A'
-    user.save()
-    print(22)
 
 
 def count_referal_hold(user: User, allocation):

@@ -144,7 +144,7 @@ class RegisterUserView(GenericAPIView):
             user.save()
 
             if user.inviter.status == 'N':
-                user.inviter.status = 'P'
+                user.inviter.status = 'A'
                 user.inviter.save()
 
         return Response({

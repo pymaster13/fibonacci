@@ -19,3 +19,6 @@ class Command(BaseCommand):
         url = f'https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress={contract2}&address={account2}&tag=latest&apikey={api_key}'
         response = requests.get(url)
         print(response.json())
+
+        # {'status': '1', 'message': 'OK', 'result': '135499'}
+        

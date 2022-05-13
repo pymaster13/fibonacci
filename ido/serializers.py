@@ -4,7 +4,7 @@ from django.core.validators import validate_email
 from rest_framework import serializers
 
 from .exceptions import IDOExistsError, AllocationError
-from .models import IDO, ManuallyCharge
+from .models import IDO
 from account.exceptions import (EmailValidationError, UserDoesNotExists)
 
 
@@ -28,12 +28,6 @@ class IDOSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IDO
-        fields = '__all__'
-
-
-class ManuallyChargeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ManuallyCharge
         fields = '__all__'
 
 

@@ -37,9 +37,10 @@ class IDO(models.Model):
     person_allocation = models.FloatField(verbose_name='Person allocation')
     buy_date = models.DateTimeField(verbose_name='Buy date')
     tge = models.DateTimeField(verbose_name='Token Generating Event')
-    vesting =models.CharField(max_length=128, verbose_name='Vesting')
+    vesting = models.CharField(max_length=128, verbose_name='Vesting')
     smartcontract = models.OneToOneField(Address,
                                          null=True,
+                                         blank=True,
                                          on_delete=models.CASCADE,
                                          verbose_name='Smartcontract address')
     exchange = models.ForeignKey(Exchange,
@@ -76,23 +77,6 @@ class IDO(models.Model):
     @property
     def count_participants(self):
         return self.general_allocation // self.person_allocation
-
-
-class ManuallyCharge(models.Model):
-    """Model of manually charges of coins (IDO.without_pay=True).
-    Fields: type (transcript):
-        - ido: IDO
-        - amount: float
-        - coin: str
-    """
-
-    ido = models.ForeignKey(IDO,
-                            on_delete=models.CASCADE,
-                            verbose_name='IDO')
-    amount = models.FloatField(verbose_name='Amount')
-    coin = models.ForeignKey(Coin,
-                             on_delete=models.CASCADE,
-                             verbose_name='Coin')
 
 
 class IDOParticipant(models.Model):
