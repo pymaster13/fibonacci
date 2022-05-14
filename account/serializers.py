@@ -239,7 +239,6 @@ class EmailSerializer(serializers.Serializer):
             validate_email(email)
         except ValidationError:
             raise EmailValidationError('Введите корректный почтовый ящик.')
-
         try:
             return User.objects.get(email=email)
         except Exception:

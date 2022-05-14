@@ -7,7 +7,9 @@ from .views import (GetTgCodeView, RegisterUserView, LoginUserView,
                     GenerateGoogleQRView, VerifyGoogleCodeView,
                     RetrievePermissionsView, RetrieveUserInfoView,
                     RetrieveUserPartnersView, DashboardView,
-                    DashboardReferalChargesView, UserIDOsView)
+                    DashboardReferalChargesView, UserIDOsView,
+                    UserIDOsStatsView, UserPartnersStatsView,
+                    PartnersStatsByEmailView, ReferalChargesView)
 
 
 urlpatterns = [
@@ -37,5 +39,10 @@ urlpatterns = [
     path('dashboard_referal_table/', DashboardReferalChargesView.as_view(), name='dashboard_referal_table'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
 
+    path('retrieve_partners_by_email/', PartnersStatsByEmailView.as_view(), name='retrieve_partners_by_email'),
+    
     path('idos/', UserIDOsView.as_view(), name='idos'),
+    path('stats/idos/', UserIDOsStatsView.as_view(), name='stats_idos'),
+    path('stats/partners/', UserPartnersStatsView.as_view(), name='stats_partners'),
+    path('stats/referal_charges/', ReferalChargesView.as_view(), name='stats_referals'),
 ]

@@ -151,18 +151,23 @@ class User(AbstractBaseUser, PermissionsMixin):
             full_status = 'Неактивный партнер'
         return full_status
 
+    @property
+    def general_ido_allocation(self):
+        if self.idoparticipant_set.all():
+            return sum([i.allocation for i in self.idoparticipant_set.all()])
+        return 0
+
     def as_json(self):
-        summ = sum([i.allocation for i in self.idoparticipant_set.all()])
         return {
             'id': self.id,
             'email': self.email,
             'fio': self.fio,
-            'status': self.status,
+            'status': self.full_status,
             'telegram': self.telegram.tg_nickname,
             'balance': self.balance,
             'line': self.line,
             'referal': self.partners,
-            'ido': summ if summ else 0
+            'ido_allocation': self.general_ido_allocation
         }
 
 

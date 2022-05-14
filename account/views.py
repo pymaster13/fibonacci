@@ -7,7 +7,8 @@ from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
-                                   HTTP_200_OK)
+                                   HTTP_200_OK,
+                                   HTTP_403_FORBIDDEN)
 from knox.models import AuthToken
 import pyotp
 
@@ -29,7 +30,6 @@ from .services import (generate_code, check_code_time,
                        generate_google_qrcode, retrieve_permissions)
 from administrator.services import retrieve_users_info
 from ido.models import IDOParticipant
-from ido.paginations import SmallResultsSetPagination
 from core.models import Coin
 
 
@@ -489,17 +489,21 @@ class UserIDOsView(GenericAPIView):
     """API endpoint to show user IDOs."""
 
     permission_classes = (IsAuthenticated,)
-    pagination_class = SmallResultsSetPagination
 
     def get(self, request):
 
         user = User.objects.get(email=request.user)
+        if not user.can_invite:
+            return Response({
+                "error": 'У пользователя нет прав на просмотр IDO.'
+                }, status=HTTP_403_FORBIDDEN)
+        
         result = []
+        
         try:
             idos = IDOParticipant.objects.filter(user=user)
             if idos:
                 for ido in idos:
-                    print(ido.ido)
                     ido_info = PureIDOSerializer(ido.ido)
                     result.append({'ido_info': ido_info.data,
                                   'user_allocation': ido.allocation})
@@ -510,3 +514,153 @@ class UserIDOsView(GenericAPIView):
                             status=HTTP_400_BAD_REQUEST)
 
         return Response({'user_idos': result})
+
+
+class UserIDOsStatsView(GenericAPIView):
+    """API endpoint to show user IDOs."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+        if not user.can_invite:
+            return Response({
+                "error": 'У пользователя нет прав на получение статистики.'
+                }, status=HTTP_403_FORBIDDEN)
+        try:
+            metamask = MetamaskWallet.objects.get(user=user)
+            user_address = metamask.wallet_address
+        except Exception:
+            Response({"error": "У пользователя не привязан кошелек Metamask."},
+                     status=HTTP_400_BAD_REQUEST)
+        result = []
+        try:
+            idos = IDOParticipant.objects.filter(user=user)
+            if idos:
+                for ido_part in idos:
+                    coin = ido_part.ido.coin
+                    smart = ido_part.ido.smartcontract
+
+                    refund = ido_part.refund_allocation
+                    ts = Transaction.objects.filter(address_to=user_address,
+                                                    coin=coin,
+                                                    referal=False)
+                    if ts:
+                        print(ts.filter(received=True))
+                        if ts.filter(received=True):
+                            received = sum(t.amount for t in ts.filter(received=True))
+                        else:
+                            received = 0
+                        if ts.filter(received=False):
+                            available = sum(t.amount for t in ts.filter(received=False))
+                        else:
+                            available = 0
+                    else:
+                        received = 0
+                        available = 0
+
+                    result.append({
+                        'coin': coin.name,
+                        'smartcontract': smart.address if smart else '',
+                        'received': received,
+                        'refund_allocation': refund,
+                        'available': available
+                    })
+
+        except Exception as e:
+            print(e)
+            return Response({"error": "Ошибка получения информации об IDO пользователя."},
+                            status=HTTP_400_BAD_REQUEST)
+
+        return Response({'idos_stats': result})
+
+
+class UserPartnersStatsView(GenericAPIView):
+    """API endpoint to show user partners."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+        if not user.can_invite:
+            return Response({
+                "error": 'У пользователя нет прав на получение статистики.'
+                }, status=HTTP_403_FORBIDDEN)
+
+        partners = user.partners['partners']
+        if partners:
+            return Response(partners)
+        else:
+            return Response({"result": "У пользователя нет партнеров."})
+
+
+class PartnersStatsByEmailView(GenericAPIView):
+    """API endpoint to show partners of partner."""
+
+    serializer_class = EmailSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        request_user = User.objects.get(email=request.user)
+
+        if not request_user.can_invite:
+            return Response({
+                "error": 'У пользователя нет прав на получение статистики.'
+                }, status=HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid()
+        except (EmailValidationError, UserDoesNotExists) as e:
+            return Response({
+                "error": str(e)
+                }, status=HTTP_400_BAD_REQUEST)
+        email = serializer.validated_data['email']
+        user = User.objects.get(email=email)
+
+        partners = user.partners['partners']
+        if partners:
+            return Response(partners)
+        else:
+            return Response({"result": "У пользователя нет партнеров."})
+
+
+class ReferalChargesView(GenericAPIView):
+    """API endpoint to show refaral charges of user."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+
+        if not user.can_invite:
+            return Response({
+                "error": 'У пользователя нет прав на статистики.'
+                }, status=HTTP_403_FORBIDDEN)
+
+        try:
+            print(123)
+            metamask = MetamaskWallet.objects.get(user=user)
+            print(metamask.wallet_address.address)
+            print(321)
+            user_address = metamask.wallet_address
+        except Exception:
+            Response({"error": "У пользователя не привязан кошелек Metamask."},
+                     status=HTTP_400_BAD_REQUEST)
+
+        result = []
+        transactions = Transaction.objects.filter(address_to=user_address,
+                                                  referal=True)
+        print(transactions)
+        if transactions:
+            for ts in transactions:
+                print(ts.address_from)
+                wallet_from = MetamaskWallet.objects.get(wallet_address=ts.address_from) 
+                result.append({
+                    'date': f'{ts.date.day}.{ts.date.month}.{ts.date.year}',
+                    'coin': ts.coin.name,
+                    'amount': ts.amount,
+                    'from': wallet_from.user.email,
+                })
+
+        return Response({"referal_charges": result})
