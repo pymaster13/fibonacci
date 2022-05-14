@@ -216,6 +216,7 @@ class IDODeleteView(DestroyAPIView):
 
             for part in IDOParticipant.objects.filter(ido=instance):
                 part.user.hold += part.allocation
+                part.user.balance += part.allocation
                 part.user.save()
                 part.delete()
             return Response(status=HTTP_204_NO_CONTENT)
