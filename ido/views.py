@@ -235,63 +235,71 @@ class ParticipateIDOView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
+        # try:
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.get(email=request.user)
+
+        ido = serializer.validated_data
+
+        if user.balance < 651 or float(user.balance) < 1.3 * float(ido.person_allocation) + 1.0:
+            return Response(
+                {'error': 'У пользователя недостаточно средств на счете.'},
+                status=HTTP_400_BAD_REQUEST
+                )
+
         try:
-            serializer.is_valid(raise_exception=True)
-            user = User.objects.get(email=request.user)
-
-            ido = serializer.validated_data
-
-            if user.balance < 651 or user.balance < Decimal(1.3) * Decimal(ido.person_allocation) + Decimal(1):
+            queue_object = QueueUser.objects.get(ido=ido, user=user)
+            if queue_object.number > ido.count_participants:
                 return Response(
-                    {'error': 'У пользователя недостаточно средств на счете.'},
+                    {'error': 'Место в очереди не позволяет Вам участововать в данном IDO.'},
                     status=HTTP_400_BAD_REQUEST
-                    )
+                )
+        except Exception:
+            return Response(
+                    {'error': 'Вы не находитесь в очереди на участие в IDO.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
 
+        participants = IDOParticipant.objects.filter(ido=ido)
+        used_allocation = len(participants) * ido.person_allocation
+
+        referal = count_referal_hold(user, ido.person_allocation)
+
+        print(11)
+        if ido.general_allocation - used_allocation >= ido.person_allocation:
             try:
-                queue_object = QueueUser.objects.get(ido=ido, user=user)
-                if queue_object.number > ido.count_participants:
-                    return Response(
-                        {'error': 'Место в очереди не позволяет Вам участововать в данном IDO.'},
-                        status=HTTP_400_BAD_REQUEST
-                    )
-            except Exception:
+                participate_ido(user, ido, ido.person_allocation)
+                print(22)
+            except Exception as e:
+                print(e)
                 return Response(
-                        {'error': 'Вы не находитесь в очереди на участие в IDO.'},
-                        status=HTTP_400_BAD_REQUEST
-                    )
-
-            participants = IDOParticipant.objects.filter(ido=ido)
-            used_allocation = len(participants) * ido.person_allocation
-
-            referal = count_referal_hold(user, ido.person_allocation)
-
-            if ido.general_allocation - used_allocation >= ido.person_allocation:
-                try:
-                    participate_ido(user, ido, ido.person_allocation)
-
-                except Exception as e:
-                    print(e)
-                    return Response(
-                        {'error': 'Вы уже участвуете в данном IDO.'},
-                        status=HTTP_400_BAD_REQUEST
-                    )
-
-                else:
-                    fill_admin_wallet(int(ido.person_allocation * 0.3))
-
-                    if referal and user.inviter:
-                        realize_ido_part_referal(user, referal)
-
-                    return Response({'status': 'success'})
+                    {'error': 'Вы уже участвуете в данном IDO.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
 
             else:
-                return Response(
-                        {'error': 'К сожалению, вся аллокация IDO уже распределена.'},
-                        status=HTTP_400_BAD_REQUEST
-                    )
+                print(33)
+                if referal and user.inviter:
+                    realize_ido_part_referal(user, referal)
+                    print(444444)
+                    print(type(ido.person_allocation))
+                    print(type(referal))
+                    diff = float(ido.person_allocation) * 0.3 - float(referal)
+                    fill_admin_wallet(user, float(ido.person_allocation), diff)
+                else:
+                    print(55)
+                    fill_admin_wallet(user, float(ido.person_allocation), ido.person_allocation * 0.3)
 
-        except Exception as e:
-            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+                return Response({'status': 'success'})
+
+        else:
+            return Response(
+                    {'error': 'К сожалению, вся аллокация IDO уже распределена.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+
+        # except Exception as e:
+        #     return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
 
 
 class AddUserQueue(GenericAPIView):

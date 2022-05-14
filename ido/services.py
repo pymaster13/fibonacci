@@ -78,9 +78,24 @@ def process_ido_data(request_query_dict: dict):
     return data, users_obj, allocations
 
 
-def fill_admin_wallet(amount: str):
+def fill_admin_wallet(user, amount, commission):
+    print(1111)
     admin_wallet = get_main_wallet()
+    metamask_from = MetamaskWallet.objects.get(user=user)
+    coin, _ = Coin.objects.get_or_create(name='BUSD',
+                                         network='BEP20')
+    print(111)
+    Transaction.objects.create(
+                    address_from=metamask_from.wallet_address,
+                    address_to=admin_wallet.wallet_address,
+                    coin=coin,
+                    amount=amount,
+                    commission=commission
+                    )
+    print(222)
+
     admin_wallet.balance += Decimal(amount)
+    print(333)
     admin_wallet.save()
 
 
@@ -100,8 +115,7 @@ def realize_ido_part_referal(user: User, referal: Decimal):
                     address_to=metamask_to.wallet_address,
                     coin=coin,
                     amount=Decimal(referal),
-                    referal=True,
-                    received=True,
+                    referal=True
     )
     user.inviter.referal_balance += transaction.amount
     user.inviter.save()

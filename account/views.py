@@ -636,7 +636,7 @@ class ReferalChargesView(GenericAPIView):
 
         if not user.can_invite:
             return Response({
-                "error": 'У пользователя нет прав на статистики.'
+                "error": 'У пользователя нет прав на получение статистики.'
                 }, status=HTTP_403_FORBIDDEN)
 
         try:

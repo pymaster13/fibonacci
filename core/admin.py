@@ -34,7 +34,7 @@ class AdminWalletAdmin(admin.ModelAdmin):
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('address_from', 'address_to', 'received',
+    list_display = ('address_from', 'address_to', 'received', 'referal',
                     'visible', 'coin', 'amount', 'commission', 'date')
 
 @admin.register(AccountBalance)

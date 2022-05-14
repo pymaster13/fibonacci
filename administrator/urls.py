@@ -4,7 +4,8 @@ from .views import (LoginAdminUserView, GrantPermissionsView,
                     Reset2FAView, AllowUserInviteView, AddVIPUserView,
                     DeleteVIPUserView, SetUserPermanentPlaceView,
                     GetUserIDOView, RetrieveUsersInformationView,
-                    CreateCustomTokenWalletView)
+                    CreateCustomTokenWalletView, AdminStatsView,
+                    AdminReportByDayView)
 
 urlpatterns = [
     path('login_admin_2fa/', LoginAdminUserView.as_view(), name='login_admin_2fa'),
@@ -20,4 +21,7 @@ urlpatterns = [
     path('get_user_ido_allocation/', GetUserIDOView.as_view(), name='get_user_ido_allocation'),
     path('retrieve_users_info/', RetrieveUsersInformationView.as_view(), name='retrieve_users_info'),
     path('create_wallet/', CreateCustomTokenWalletView.as_view(), name='create_wallet'),
+    path('stats/', AdminStatsView.as_view(), name='stats'),
+    path('stats_by_day/', AdminReportByDayView.as_view(), name='stats_by_day'),
+
 ]

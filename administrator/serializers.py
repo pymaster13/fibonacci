@@ -1,4 +1,5 @@
-﻿from django.contrib.auth import authenticate, get_user_model
+﻿import re
+from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from eth_typing import Address
@@ -7,6 +8,7 @@ from rest_framework import serializers
 from account.exceptions import (EmailValidationError, LoginUserError,
                                 UserDoesNotExists)
 from account.serializers import EmailSerializer
+from administrator.exceptions import IncorrectDateError
 
 User = get_user_model()
 
@@ -112,3 +114,27 @@ class AdminCustomTokenWalletSerializer(serializers.Serializer):
                         error_messages={
                             'blank': "Множитель не может быть пустым."
                             })
+
+
+class ReportDaySerializer(serializers.Serializer):
+    """Serializer for day of report."""
+
+    date_in_str = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Процент не может быть пустым."
+                            })
+
+    def validate(self, attrs):
+        date_in_str = attrs['date_in_str']
+        result = re.match(r'\d{1,2}-\d{1,2}-\d{4}', date_in_str)
+        if not result:
+            raise IncorrectDateError('Дата должна быть в формате dd-mm-YYYY.')
+
+        group = result.group(0)
+        splitted_group = group.split('-')
+        day = splitted_group[0]
+        month = splitted_group[1]
+        year = splitted_group[2]
+
+        return day, month, year
