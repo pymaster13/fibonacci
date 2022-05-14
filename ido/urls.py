@@ -2,7 +2,8 @@ from django.urls import path
 
 from .views import (IDOCreateView, IDOUpdateView, IDODeleteView,
                     IDORetrieveView, IDOListView, ParticipateIDOView,
-                    AddUserQueue)
+                    AddUserQueue, ChargeTokensManuallyView,
+                    ChargeRefundAllocationView)
 
 
 urlpatterns = [
@@ -13,6 +14,9 @@ urlpatterns = [
 
     path('attach_to_queue/', AddUserQueue.as_view(), name='attach_to_queue'),
     path('participate/', ParticipateIDOView.as_view(), name='participate_ido'),
+
+    path('charge_manually/', ChargeTokensManuallyView.as_view(), name='charge_manually'),
+    path('charge_refund_allocation/', ChargeRefundAllocationView.as_view(), name='charge_refund_allocation'),
 
     path('', IDOListView.as_view(), name='list_ido'),
 ]

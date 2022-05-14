@@ -1,4 +1,5 @@
 from decimal import Decimal
+from time import sleep
 
 from django.contrib.auth import get_user_model
 from django.db.models import Max
@@ -10,12 +11,14 @@ from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
                                      ListAPIView, GenericAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from core.exceptions import AdminWalletIsEmptyError
 
-from core.models import AdminWallet, Coin, MetamaskWallet, Transaction
+from core.models import AdminWallet, Coin, MetamaskWallet, Transaction, Address
+from core.services import distribute_tokens, referal_by_income
 
-from .exceptions import ExchangeAddError, IDOExistsError, AllocationError
+from .exceptions import ExchangeAddError, IDOExistsError, AllocationError, ManuallyChargeError
 from .models import IDO, IDOParticipant, QueueUser
-from .serializers import (IDOSerializer, AddUserQueueSerializer,
+from .serializers import (ChargeManuallySerializer, IDOSerializer, AddUserQueueSerializer,
                           ParticipateIDOSerializer, PureIDOSerializer)
 from .services import (decline_ido_part_referal, delete_participant, process_ido_data, fill_admin_wallet,
                        realize_ido_part_referal, participate_ido, takeoff_admin_wallet,
@@ -357,6 +360,123 @@ class AddUserQueue(GenericAPIView):
                     )
             else:
                 return Response({'status': 'success'})
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
+
+class ChargeTokensManuallyView(GenericAPIView):
+    """API endpoint to manually charging tokens to IDO users."""
+
+    serializer_class = ChargeManuallySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+
+        user = User.objects.get(email=request.user)
+
+        if not user.has_perm('ido.add_ido'):
+            if not user.is_superuser:
+                return Response(
+                    {'error': 'У пользователя нет прав на осуществление начисления.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (ManuallyChargeError, IDOExistsError) as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        try:
+            busd_amount, ido = serializer.validated_data
+            amount = Decimal(busd_amount)/ido.coin.cost_in_busd
+
+            print(amount, ido)
+
+            if not ido.smartcontract:
+                return Response(
+                    {'error': 'Смартконтракт IDO не указан.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+            if not ido.charge_manually:
+                return Response(
+                    {'error': 'Средства в данном IDO распределяются автоматически.'},
+                    status=HTTP_400_BAD_REQUEST
+                    )
+
+            address = Address.objects.get(coin=ido.coin,
+                                          owner_admin=True)
+
+            admin_wallet = AdminWallet.objects.get(wallet_address=address)
+            print(f'{amount=}')
+
+            ido_participants = IDOParticipant.objects.filter(ido=ido)
+            print(ido_participants)
+            if ido_participants:
+                for part in ido_participants:
+                        amount_user = referal_by_income(
+                            user=part.user,
+                            admin_wallet=admin_wallet,
+                            smartcontract=ido.smartcontract,
+                            tokens=amount)
+
+                        print('result_amount', amount_user)
+
+                        part_metamask = MetamaskWallet.objects.get(user=part.user)
+
+                        Transaction.objects.create(
+                            address_from=ido.smartcontract,
+                            address_to=part_metamask.wallet_address,
+                            coin=admin_wallet.wallet_address.coin,
+                            amount=amount_user
+                            )
+
+            return Response({'status': 'success'})
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
+
+class ChargeRefundAllocationView(GenericAPIView):
+    """API endpoint to manually charging refund allocation to IDO users."""
+
+    serializer_class = ChargeManuallySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+
+        user = User.objects.get(email=request.user)
+
+        if not user.has_perm('ido.add_ido'):
+            if not user.is_superuser:
+                return Response(
+                    {'error': 'У пользователя нет прав на осуществление начисления.'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (ManuallyChargeError, IDOExistsError) as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        try:
+            amount, ido = serializer.validated_data
+
+            ido_participants = IDOParticipant.objects.filter(ido=ido)
+            print(ido_participants)
+            if ido_participants:
+                for part in ido_participants:
+                    if part.refund_allocation < 650:
+                        if part.refund_allocation + amount > 650:
+                            part.refund_allocation = 650
+                        else:
+                            part.refund_allocation += amount
+                        part.save()
+            return Response({'status': 'success'})
 
         except Exception as e:
             return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)

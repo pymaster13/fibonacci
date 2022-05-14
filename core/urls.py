@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (AddMetamaskWalletView, RetrieveMetamaskWalletView,
                     FillUserReserveView, TakeOffUserReserveView,
                     RetrieveAdminWalletView, FillUserReserveByReferalsView,
-                    TakeOffUserReferalsView)
+                    TakeOffUserReferalsView, TakeOffIDOTokensView)
 
 
 urlpatterns = [
@@ -16,5 +16,5 @@ urlpatterns = [
 
     path('fill_user_reserve_by_referal/', FillUserReserveByReferalsView.as_view(), name='fill_user_reserve_by_referal'),
     path('takeoff_referals/', TakeOffUserReferalsView.as_view(), name='takeoff_referals'),
-
+    path('takeoff_ido_tokens/', TakeOffIDOTokensView.as_view(), name='takeoff_ido_tokens'),
 ]

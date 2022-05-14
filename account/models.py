@@ -124,6 +124,21 @@ class User(AbstractBaseUser, PermissionsMixin):
                             }
                 }
 
+    @staticmethod
+    def get_user_inviters(user, inviters=None):
+        if inviters is None:
+            inviters = []
+        if user.inviter:
+            inviters.append(user.inviter)
+            return User.get_user_inviters(user.inviter, inviters)
+        else:
+            return inviters
+
+    @property
+    def inviters(self):
+        inviters = User.get_user_inviters(self)
+        return inviters
+
     @property
     def partners(self):
         partners = User.retrieve_all_user_partners(self)

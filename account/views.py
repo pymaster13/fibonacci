@@ -543,16 +543,17 @@ class UserIDOsStatsView(GenericAPIView):
 
                     refund = ido_part.refund_allocation
                     ts = Transaction.objects.filter(address_to=user_address,
-                                                    coin=coin,
-                                                    referal=False)
+                                                    coin=coin)
                     if ts:
                         print(ts.filter(received=True))
                         if ts.filter(received=True):
-                            received = sum(t.amount for t in ts.filter(received=True))
+                            received = sum(t.amount for t in ts.filter(received=True,
+                                                                       visible=True))
                         else:
                             received = 0
                         if ts.filter(received=False):
-                            available = sum(t.amount for t in ts.filter(received=False))
+                            available = sum(t.amount for t in ts.filter(received=False,
+                                                                        visible=True))
                         else:
                             available = 0
                     else:

@@ -10,10 +10,10 @@ import sys
 import dramatiq
 from core.models import Coin
 
-from core.services import (get_custom_admin_wallets, get_smartcontract_by_coin,
+from core.services import (get_custom_admin_wallets,
                            divide, fill_admin_custom_wallet, distribute_tokens)
 
-from config.settings import COINMARKETCAP_API_KEY
+from config.settings import COINMARKETCAP_API_KEY, ETHERSCAN_API
 
 from pycoingecko import CoinGeckoAPI
 # from pythonpancakes import PancakeSwapAPI
@@ -21,30 +21,37 @@ import defi.defi_tools as dft
 from decimal import getcontext, Decimal
 import time
 
+from ido.models import IDO
+
 
 """
-Run dramatiq workers - "dramatiq core.tasks"
+Run dramatiq workers - "python3 manage.py rundramatiq"
 """
+
+# contract = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
+# contract2= '0x57d90b64a1a57749b0f932f1a3395792e12e7055'
+# account = '0x4e83362442b8d1bec281594cea3050c8eb01311c'
+# account2 = '0xe04f27eb70e025b78871a2ad7eabe85e61212761'
 
 
 @dramatiq.actor
-def process():
-    """Very simple task for demonstrating purpose."""
+def scan_admin_wallets():
+    """Regular task for scanning admin_wallets"""
 
-    print('Start processsss')
-
-    api_key = 'M7YIPI177FP25ETG47N7G112DXXWNMATS6'
+    print('FUCK')
 
     admin_wallets = get_custom_admin_wallets()
 
     for wallet in admin_wallets:
-        smart = get_smartcontract_by_coin(coin=wallet.wallet_address.coin)
+        print(1)
+        ido = IDO.objects.get(coin=wallet.wallet_address.coin)
+        smart = ido.smartcontract
         address = wallet.wallet_address.address
-
-        url = f'https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress={smart}&address={address}&tag=latest&apikey={api_key}'
+        print(2)
+        url = f'https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress={smart}&address={address}&tag=latest&apikey={ETHERSCAN_API}'
         response = requests.get(url)
         data = response.json()
-
+        print(3)
         # {'status': '1', 'message': 'OK', 'result': '135499'}
         if data.get('message') == 'OK':
             getcontext().prec = wallet.decimal
@@ -57,7 +64,6 @@ def process():
 
             # wallet.balance - in db
             # tokens - real balance on admin wallet
-
             print(repr(tokens - wallet.balance))
 
             if wallet.balance < tokens:
@@ -72,14 +78,6 @@ def process():
                 wallet.balance = tokens
                 wallet.save()
 
-    # contract = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
-    # contract2= '0x57d90b64a1a57749b0f932f1a3395792e12e7055'
-    # account = '0x4e83362442b8d1bec281594cea3050c8eb01311c'
-    # account2 = '0xe04f27eb70e025b78871a2ad7eabe85e61212761'
-
-    # # url = f'https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={contract}&address={account}&page=1&offset=100&startblock=0&endblock=27025780&sort=asc&apikey={api_key}'
-    # response = requests.get(url)
-    # print(response.json())
 
 @dramatiq.actor
 def retreive_coins_cost():

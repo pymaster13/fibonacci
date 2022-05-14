@@ -40,7 +40,7 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
 
     path('retrieve_partners_by_email/', PartnersStatsByEmailView.as_view(), name='retrieve_partners_by_email'),
-    
+
     path('idos/', UserIDOsView.as_view(), name='idos'),
     path('stats/idos/', UserIDOsStatsView.as_view(), name='stats_idos'),
     path('stats/partners/', UserPartnersStatsView.as_view(), name='stats_partners'),

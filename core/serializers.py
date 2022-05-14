@@ -40,3 +40,13 @@ class UserReserveSerializer(serializers.Serializer):
                                         'blank': "Сумма не может быть пустой.",
                                         'required': "Поле 'сумма' отсутствует."
                                         })
+
+
+class CustomTokenSerializer(serializers.Serializer):
+    """Serializer for custom token."""
+
+    coin = serializers.CharField(required=True,
+                                    error_messages={
+                                        'blank': "Название токена не может быть пустым.",
+                                        'required': "Поле 'название токена' отсутствует."
+                                        })

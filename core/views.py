@@ -9,11 +9,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from core.models import Address
-from ido.models import QueueUser
+from ido.models import IDO, IDOParticipant, QueueUser
 from .exceptions import MetamaskWalletExistsError
 from .models import MetamaskWallet, AdminWallet, Coin, Transaction
-from .serializers import (MetamaskWalletSerializer, UserReserveSerializer)
-from .services import get_main_wallet
+from .serializers import (CustomTokenSerializer, MetamaskWalletSerializer, UserReserveSerializer)
+from .services import get_main_wallet, referal_by_income
 
 
 User = get_user_model()
@@ -329,4 +329,101 @@ class TakeOffUserReferalsView(GenericAPIView):
         except Exception as e:
             print(e)
             return Response({"error": 'Ошибка снятия реферальных средств с резерва аккаунта.'},
+                            status=HTTP_400_BAD_REQUEST)
+
+
+class TakeOffIDOTokensView(GenericAPIView):
+    """API endpoint for takeoff IDO user tokens from admin wallet."""
+
+    serializer_class = CustomTokenSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        coin_name = serializer.validated_data['coin']
+        coin = Coin.objects.get(name=coin_name)
+        print(coin)
+        try:
+            user = User.objects.get(email=request.user)
+            try:
+                metamask = MetamaskWallet.objects.get(user=user)
+            except Exception as e:
+                return Response({"error": "У пользователя не привязан метамаск-кошелек."},
+                                status=HTTP_400_BAD_REQUEST)
+            transactions = Transaction.objects.filter(address_to=metamask.wallet_address,
+                                                      coin=coin, received=False)
+            if transactions:
+
+                ido = IDO.objects.get(coin=coin)
+                ido_participant = IDOParticipant.objects.get(user=user, ido=ido)
+
+                admin_address = Address.objects.get(coin=coin, owner_admin=True)
+                admin_wallet = AdminWallet.objects.get(wallet_address=admin_address)
+
+                income_in_busd = sum(trans.amount for trans in transactions) * coin.cost_in_busd
+                income_tokens = sum(trans.amount for trans in transactions)
+                busd = Coin.objects.get(name='BUSD')
+
+                if ido_participant.refund_allocation < 650:
+                    if Decimal(ido_participant.refund_allocation) + income_in_busd >= 650:
+                        print(Decimal(ido_participant.refund_allocation))
+                        print(income_in_busd)
+                        diff_busd = Decimal(ido_participant.refund_allocation) + income_in_busd - Decimal(650)
+                        print(f'{income_in_busd=}')
+                        print(f'{income_tokens=}')
+                        print(f'{diff_busd=}')
+                        diff_tokens = diff_busd / coin.cost_in_busd
+                        print(f'{diff_tokens=}')
+
+                        ido_participant.refund_allocation = 650
+                        ido_participant.save()
+
+                        diff_result = referal_by_income(user,
+                                                        admin_wallet,
+                                                        ido.smartcontract,
+                                                        diff_tokens)
+                        print(f'{diff_result=}')
+                        tokens_result = income_tokens - diff_tokens + diff_result
+                        print(f'{tokens_result=}')
+                        print(f'{income_tokens=}')
+                        print(f'{diff_tokens=}')
+                        print(f'{diff_result=}')
+
+                        Transaction.objects.create(address_from=ido.smartcontract,
+                                                   address_to=metamask.wallet_address,
+                                                   coin=coin,
+                                                   amount=tokens_result,
+                                                   )
+                        for trans in transactions:
+                            trans.received = True
+                            trans.visible = False
+                            trans.save()
+
+                        return Response({'status': 'fail', 'decription': 'Перерасчет доходов по IDO с учетом реферальной программы'},
+                                        status=HTTP_200_OK)
+
+
+                    else:
+                        for trans in transactions:
+                            trans.received = True
+                            trans.save()
+                        admin_wallet.balance -= income_tokens
+                        admin_wallet.save()
+                        ido_participant.refund_allocation += income_busd
+                        ido_participant.save()
+                        return Response({'status': 'success'})
+
+                else:
+                    for trans in transactions:
+                        trans.received = True
+                        trans.save()
+                    admin_wallet.balance -= income_tokens
+                    return Response({'status': 'success'})
+
+            return Response({"error": 'Отсутствуют транзакции.'},
+                            status=HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({"error": 'Ошибка привязки адреса кошелька.'},
                             status=HTTP_400_BAD_REQUEST)

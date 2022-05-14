@@ -1,15 +1,11 @@
-﻿from .tasks import process, retreive_coins_cost
+﻿from .tasks import scan_admin_wallets, retreive_coins_cost
 
 
 def periodically_run_job():
-
-    """This task will be run by APScheduler. It can prepare some data and parameters and then enqueue background task."""
-    print('TOKENS')
-    process.send()
+    print('Scan admin wallets')
+    scan_admin_wallets.send()
 
 
 def periodically_run_job_2():
-
-    """This task will be run by APScheduler. It can prepare some data and parameters and then enqueue background task."""
-    print('COINS')
+    print('Scan coins cost')
     retreive_coins_cost.send()

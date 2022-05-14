@@ -35,7 +35,7 @@ class Address(models.Model):
     owner_admin = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('address', 'coin')
+        unique_together = ('address', 'owner_admin')
 
     def __str__(self):
         return self.address
@@ -58,7 +58,7 @@ class AdminWallet(models.Model):
 
     wallet_address = models.ForeignKey(Address, on_delete=models.CASCADE,
                                        verbose_name='Admin wallet address')
-    balance = models.DecimalField(null=True, blank=True, max_digits=100,
+    balance = models.DecimalField(default=0, null=True, blank=True, max_digits=100,
                                   decimal_places=50, verbose_name='Admin wallet balance')
     decimal = models.IntegerField(default=0, verbose_name='Admin wallet decimal')
 
@@ -99,6 +99,7 @@ class Transaction(models.Model):
                                      verbose_name='Transaction commission')
     referal = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
+    visible = models.BooleanField(default=True)
 
     date = models.DateTimeField(auto_now_add=True)
 

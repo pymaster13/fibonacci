@@ -140,6 +140,8 @@ EMAIL_USE_SSL = False
 
 COINMARKETCAP_API_KEY = os.getenv('COINMARKETCAP_API_KEY',
                                   'cc32eb41-1867-478f-8610-75592817a613')
+ETHERSCAN_API = os.getenv('ETHERSCAN_API',
+                          'M7YIPI177FP25ETG47N7G112DXXWNMATS6')
 
 DRAMATIQ_BROKER = {
     "BROKER": "dramatiq.brokers.redis.RedisBroker",
