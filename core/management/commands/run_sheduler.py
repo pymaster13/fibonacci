@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('Preparing scheduler')
 
-        cron = CronTrigger(hour='*', minute='*', second=1, timezone=pytz.UTC)
+        cron = CronTrigger(hour='*', minute='*/5', second='*', timezone=pytz.UTC)
         scheduler.add_job(periodically_run_job, cron)
         scheduler.add_job(periodically_run_job_2, cron)
         print('Start scheduler')

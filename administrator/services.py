@@ -13,7 +13,7 @@ def grant_permissions(user, perms):
     """Help function to grant permissions to user"""
     try:
         actions = ('add', 'change', 'delete')
-        permissions_db = ("ido", "transaction", "user", "news")
+        permissions_db = ("ido", "transaction", "user", "news", "statistics")
         result_perms = []
 
         for perm in perms:

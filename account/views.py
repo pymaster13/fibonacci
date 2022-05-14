@@ -1,3 +1,6 @@
+import datetime
+from math import ceil
+
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token as ResetPasswordToken
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
@@ -7,7 +10,9 @@ from rest_framework.status import (HTTP_400_BAD_REQUEST,
                                    HTTP_200_OK)
 from knox.models import AuthToken
 import pyotp
-from yaml import serialize
+
+from core.models import MetamaskWallet, Transaction
+from ido.serializers import PureIDOSerializer
 
 from .exceptions import (LoginUserError, EmailValidationError,
                          TgAccountVerifyError, InviterUserError,
@@ -23,6 +28,9 @@ from .services import (generate_code, check_code_time,
                        verify_google_code, send_mail_message,
                        generate_google_qrcode, retrieve_permissions)
 from administrator.services import retrieve_users_info
+from ido.models import IDOParticipant
+from ido.paginations import SmallResultsSetPagination
+from core.models import Coin
 
 
 User = get_user_model()
@@ -360,3 +368,145 @@ class RetrieveUserPartnersView(GenericAPIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+
+class DashboardView(GenericAPIView):
+    """API endpoint to show dashboard."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+        idos = IDOParticipant.objects.filter(user=user)
+        if idos:
+            idos_allocation = sum([ido.allocation for ido in idos if ido.allocation])
+        else:
+            idos_allocation = 0
+
+        try:
+            metamask = MetamaskWallet.objects.get(user=user)
+            user_address = metamask.wallet_address
+            busd, _ = Coin.objects.get_or_create(name='BUSD')
+            transactions = Transaction.objects.filter(address_to=user_address,
+                                                      coin=busd,
+                                                      referal=True)
+            if transactions:
+                referal_income = sum(trans.amount for trans in transactions if trans.amount)
+            else:
+                referal_income = 0
+
+            current_year = datetime.date.today().year
+            query_month_pred_2 = datetime.date.today().month - 2
+            if query_month_pred_2 == -1:
+                query_month_pred_2 = 11
+                query_year_pred_2 = current_year - 1
+                query_month_pred_1 = 12
+                query_year_pred_1 = current_year - 1
+            if query_month_pred_2 == 0:
+                query_month_pred_2 = 12
+                query_year_pred_2 = current_year - 1
+                query_month_pred_1 = 1
+                query_year_pred_1 = current_year
+            else:
+                query_year_pred_2 = current_year
+                query_month_pred_1 = query_month_pred_2 + 1
+                query_year_pred_1 = current_year
+
+            transactions_m_2 = Transaction.objects.filter(address_to=user_address,
+                                                          coin=busd,
+                                                          referal=True,
+                                                          date__month=query_month_pred_2,
+                                                          date__year=query_year_pred_2)
+            transactions_m_1 = Transaction.objects.filter(address_to=user_address,
+                                                          coin=busd,
+                                                          referal=True,
+                                                          date__month=query_month_pred_1,
+                                                          date__year=query_year_pred_1)
+            transactions_m = Transaction.objects.filter(address_to=user_address,
+                                                          coin=busd,
+                                                          referal=True,
+                                                          date__month=datetime.date.today().month,
+                                                          date__year=datetime.date.today().year)
+            referal_income_pred_2m = sum(trans.amount for trans in transactions_m_2 if trans.amount)
+            referal_income_pred_m = sum(trans.amount for trans in transactions_m_1 if trans.amount)
+            referal_income_current_m = sum(trans.amount for trans in transactions_m if trans.amount)
+
+        except Exception as e:
+            print(e)
+            referal_income = 0
+            referal_income_pred_2m = 0
+            referal_income_pred_m = 0
+            referal_income_current_m = 0
+
+        result = {}
+
+        result['invite_code'] = user.invite_code
+        result['can_invite'] = user.can_invite
+        result['partners_stats'] = user.partners['stats']
+        result['idos_allocation'] = idos_allocation
+        result['referal_balance'] = user.referal_balance
+        result['referal_income'] = referal_income
+        result['referal_income_current_m'] = referal_income_current_m
+        result['referal_income_pred_m'] = referal_income_pred_m
+        result['referal_income_pred_2m'] = referal_income_pred_2m
+
+        if not result:
+            return Response({"error": "Ошибка получения информации о пользователе."},
+                            status=HTTP_400_BAD_REQUEST
+                            )
+
+        return Response(result)
+
+
+class DashboardReferalChargesView(GenericAPIView):
+    """API endpoint to show dashboard referal charges."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+        transacts = []
+        try:
+            metamask = MetamaskWallet.objects.get(user=user)
+            user_address = metamask.wallet_address
+            transactions = Transaction.objects.filter(address_to=user_address,
+                                                      referal=True).order_by('date')
+            if transactions:
+                for trans in transactions:
+                    transacts.append({'coin': trans.coin.name,
+                                 'date': f'{trans.date.day}.{trans.date.month}.{trans.date.year}'
+                    })
+
+        except Exception as e:
+            print(e)
+            return Response({"error": "Ошибка получения информации о пользователе."},
+                            status=HTTP_400_BAD_REQUEST)
+
+        return Response({'transactions': transacts})
+
+
+class UserIDOsView(GenericAPIView):
+    """API endpoint to show user IDOs."""
+
+    permission_classes = (IsAuthenticated,)
+    pagination_class = SmallResultsSetPagination
+
+    def get(self, request):
+
+        user = User.objects.get(email=request.user)
+        result = []
+        try:
+            idos = IDOParticipant.objects.filter(user=user)
+            if idos:
+                for ido in idos:
+                    print(ido.ido)
+                    ido_info = PureIDOSerializer(ido.ido)
+                    result.append({'ido_info': ido_info.data,
+                                  'user_allocation': ido.allocation})
+
+        except Exception as e:
+            print(e)
+            return Response({"error": "Ошибка получения информации об IDO пользователя."},
+                            status=HTTP_400_BAD_REQUEST)
+
+        return Response({'user_idos': result})

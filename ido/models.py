@@ -44,32 +44,32 @@ class IDO(models.Model):
                                          on_delete=models.CASCADE,
                                          verbose_name='Smartcontract address')
     exchange = models.ForeignKey(Exchange,
-                                 null=True,
+                                 null=True, blank=True,
                                  on_delete=models.CASCADE,
                                  verbose_name='Exchange')
     coin = models.ForeignKey(Coin,
-                             null=True,
+                             null=True, blank=True,
                              on_delete=models.CASCADE,
                              verbose_name='Coin')
     commission = models.FloatField(verbose_name='Platform commission, percent')
     telegram_acc = models.CharField(max_length=128,
-                                    null=True,
+                                    null=True, blank=True,
                                     verbose_name='Telegram account')
     twitter_acc = models.CharField(max_length=128,
-                                   null=True,
+                                   null=True, blank=True,
                                    verbose_name='Twitter account')
     discord_acc = models.CharField(max_length=128,
-                                   null=True,
+                                   null=True, blank=True,
                                    verbose_name='Discord account')
-    site = models.CharField(max_length=128, null=True, verbose_name='Site')
+    site = models.CharField(max_length=128, null=True, blank=True, verbose_name='Site')
     white_paper = models.CharField(max_length=128,
-                                   null=True,
+                                   null=True, blank=True,
                                    verbose_name='White paper')
 
     without_pay = models.BooleanField(default=False)
     charge_manually = models.BooleanField(default=False)
 
-    image = models.ImageField(upload_to='ido/', null=True)
+    image = models.ImageField(upload_to='ido/', null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "IDO"
@@ -97,6 +97,11 @@ class IDOParticipant(models.Model):
     allocation = models.FloatField(null=True, verbose_name='Allocation')
     date = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+
+    refund_allocation = models.FloatField(default=0.0,
+                                          verbose_name='Refund allocation')
+    income_from_income = models.FloatField(default=0.0,
+                                           verbose_name='Income from income')
 
     class Meta:
         unique_together = ('ido', 'user')

@@ -15,7 +15,7 @@ class UserAdmin(DjangoUserAdmin):
                                       'first_name', 'last_name', 'inviter',
                                       'line', 'is_active', 'status', 'permanent_place',
                                       'is_superuser', 'can_invite', 'balance', 'hold',
-                                      'is_staff')}),
+                                      'referal_balance', 'is_staff')}),
         ('Password info', {'fields': ('password',)}),
         ('Groups, permissions', {
             'fields': ('groups', 'user_permissions'),

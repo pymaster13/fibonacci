@@ -37,7 +37,6 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('address_from', 'address_to',
                     'coin', 'amount', 'commission', 'date')
 
-
 @admin.register(AccountBalance)
 class AccountBalanceAdmin(admin.ModelAdmin):
     list_display = ('user', 'from_user', 'coin', 'avaliable',

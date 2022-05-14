@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.db.models import Max
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
@@ -123,7 +125,9 @@ class FillUserReserveView(GenericAPIView):
                     status=HTTP_400_BAD_REQUEST)
 
             coin, _ = Coin.objects.get_or_create(name='BUSD', network='BEP20')
-            amount = serializer.validated_data['amount']
+            amount = Decimal(serializer.validated_data['amount'])
+
+            print(1)
 
             transaction = Transaction.objects.create(
                 address_from=wallet_address_from,
@@ -132,9 +136,23 @@ class FillUserReserveView(GenericAPIView):
                 amount=amount
                 )
 
+            print(2)
+
+            a = user.balance
+            print(a)
+            print(type(a))
+
+            b = transaction.amount
+            print(b)
+            print(type(b))
+
             user.balance += transaction.amount
             user.save()
+            print(3)
+
+
             admin_wallet.balance += transaction.amount
+            print(2)
             admin_wallet.save()
 
             return Response({'status': 'success'})
@@ -177,8 +195,8 @@ class TakeOffUserReserveView(GenericAPIView):
                     status=HTTP_400_BAD_REQUEST)
 
             coin, _ = Coin.objects.get_or_create(name='BUSD', network='BEP20')
-            amount = serializer.validated_data['amount']
-            commission = 1.0
+            amount = Decimal(serializer.validated_data['amount'])
+            commission = Decimal(1.0)
 
             if user.hold:
                 if user.balance < user.hold + amount + commission:
@@ -214,4 +232,101 @@ class TakeOffUserReserveView(GenericAPIView):
         except Exception as e:
             print(e)
             return Response({"error": 'Ошибка снятия средств с резерва аккаунта.'},
+                            status=HTTP_400_BAD_REQUEST)
+
+
+class FillUserReserveByReferalsView(GenericAPIView):
+    """API endpoint for filling user reserve (BUSD) by referal balance."""
+
+    serializer_class = UserReserveSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            data = serializer.validated_data
+
+            user = User.objects.get(email=request.user)
+
+            if data['amount'] > user.referal_balance:
+                return Response({"error": 'Недостаточно реферальных средств.'},
+                                status=HTTP_400_BAD_REQUEST)
+
+            user.referal_balance -= Decimal(data['amount'])
+            user.balance += Decimal(data['amount'])
+            user.save()
+
+            return Response({'status': 'success'})
+
+        except Exception as e:
+            print(e)
+            return Response({"error": 'Ошибка пополнения резерва аккаунта.'},
+                            status=HTTP_400_BAD_REQUEST)
+
+
+class TakeOffUserReferalsView(GenericAPIView):
+    """API endpoint to takeoff user referal reserve (BUSD)."""
+
+    serializer_class = UserReserveSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except MetamaskWalletExistsError as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=request.user)
+
+            try:
+                admin_wallet = get_main_wallet()
+            except Exception:
+                return Response(
+                    {'error': 'Не существует кошелька главного аккаунта.'},
+                    status=HTTP_400_BAD_REQUEST)
+
+            try:
+                user_metamask = MetamaskWallet.objects.get(user=user)
+                wallet_address_to = user_metamask.wallet_address
+            except Exception:
+                return Response(
+                    {'error': 'У пользователя не привязан кошелек Metamask.'},
+                    status=HTTP_400_BAD_REQUEST)
+
+            coin, _ = Coin.objects.get_or_create(name='BUSD', network='BEP20')
+            amount = Decimal(serializer.validated_data['amount'])
+            commission = Decimal(1.0)
+
+            if user.referal_balance < amount + commission or user.referal_balance == commission:
+                return Response(
+                    {'error': 'У пользователя не достаточно средств для снятия.'},
+                    status=HTTP_400_BAD_REQUEST)
+
+            if admin_wallet.balance < amount + commission:
+                return Response(
+                    {'error': 'На кошельке главного аккаунта не достаточно средств.'},
+                    status=HTTP_400_BAD_REQUEST)
+
+            transaction = Transaction.objects.create(
+                address_from=admin_wallet.wallet_address,
+                address_to=wallet_address_to,
+                coin=coin,
+                amount=amount,
+                commission=commission
+                )
+
+            user.referal_balance = user.referal_balance - transaction.amount - transaction.commission
+            user.save()
+            admin_wallet.balance = admin_wallet.balance - transaction.amount + transaction.commission
+            admin_wallet.save()
+
+            return Response({'status': 'success'})
+
+        except Exception as e:
+            print(e)
+            return Response({"error": 'Ошибка снятия реферальных средств с резерва аккаунта.'},
                             status=HTTP_400_BAD_REQUEST)

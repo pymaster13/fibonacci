@@ -107,7 +107,7 @@ REST_FRAMEWORK = {
         ),
     'DATETIME_FORMAT': '%d.%m.%Y %H:%M',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 1,
+    'PAGE_SIZE': 10,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 

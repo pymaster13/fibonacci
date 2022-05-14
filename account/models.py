@@ -34,10 +34,10 @@ class User(AbstractBaseUser, PermissionsMixin):
                              verbose_name='Email',
                              validators=[EmailValidator])
     first_name = models.CharField(max_length=128,
-                                  null=True,
+                                  null=True, blank=True,
                                   verbose_name='First name')
     last_name = models.CharField(max_length=128,
-                                 null=True,
+                                 null=True, blank=True,
                                  verbose_name='Last name')
 
     telegram = models.OneToOneField(TgAccount, on_delete=models.CASCADE,
@@ -63,10 +63,11 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 default=None,
                                 blank=True,
                                 null=True)
-    balance = models.FloatField(default=0.0)
+    balance = models.DecimalField(default=0.0, max_digits=15, decimal_places=5)
+    referal_balance = models.DecimalField(default=0.0, max_digits=15, decimal_places=5)
+    hold = models.DecimalField(default=0.0, max_digits=15, decimal_places=5)
     line = models.IntegerField(default=1)
-    permanent_place = models.IntegerField(null=True)
-    hold = models.FloatField(default=0.0)
+    permanent_place = models.IntegerField(null=True, blank=True)
 
     STATUSES = [
         ('A', 'Active'),
@@ -178,3 +179,9 @@ class GoogleAuth(models.Model):
         db_table = "google_auth"
         verbose_name = "Google Verification"
         verbose_name_plural = verbose_name
+
+
+class Statistics(models.Model):
+    """Model of stats"""
+
+    allow = models.BooleanField(default=False)

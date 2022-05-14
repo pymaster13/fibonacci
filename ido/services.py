@@ -1,4 +1,6 @@
-﻿from django.contrib.auth import get_user_model
+﻿from decimal import Decimal
+
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
@@ -78,34 +80,36 @@ def process_ido_data(request_query_dict: dict):
 
 def fill_admin_wallet(amount: str):
     admin_wallet = get_main_wallet()
-    admin_wallet.balance += amount
+    admin_wallet.balance += Decimal(amount)
     admin_wallet.save()
 
 
 def takeoff_admin_wallet(amount: str):
     admin_wallet = get_main_wallet()
-    admin_wallet.balance -= amount
+    admin_wallet.balance -= Decimal(amount)
     admin_wallet.save()
 
 
-def realize_ido_part_referal(user: User, referal: float):
-    user.inviter.balance += referal
-    user.inviter.save()
+def realize_ido_part_referal(user: User, referal: Decimal):
     coin, _ = Coin.objects.get_or_create(name='BUSD',
                                          network='BEP20')
     metamask_from = MetamaskWallet.objects.get(user=user)
     metamask_to = MetamaskWallet.objects.get(user=user.inviter)
-    Transaction.objects.create(
+    transaction = Transaction.objects.create(
                     address_from=metamask_from.wallet_address,
                     address_to=metamask_to.wallet_address,
                     coin=coin,
-                    amount=referal
+                    amount=Decimal(referal),
+                    referal=True,
+                    received=True,
     )
+    user.inviter.referal_balance += transaction.amount
+    user.inviter.save()
 
 
 def decline_ido_part_referal(user: User, referal, date):
     print(user, referal, date)
-    user.inviter.balance -= referal
+    user.inviter.balance -= Decimal(referal)
     user.inviter.save()
     coin, _ = Coin.objects.get_or_create(name='BUSD',
                                          network='BEP20')
@@ -124,43 +128,47 @@ def decline_ido_part_referal(user: User, referal, date):
 
 
 def participate_ido(user: User, ido: IDO, allocation, wo_pay=False):
-
+    print(11)
+    allocation = Decimal(allocation)
     participant, _ = IDOParticipant.objects.get_or_create(
                                         user=user,
                                         ido=ido)
     participant.allocation = allocation
     participant.save()
     if not wo_pay:
-        user.balance -= 1.3 * allocation
+        user.balance -= Decimal(1.3) * allocation
+    print(22)
     if user.hold:
-        if user.hold <= 1.3 * allocation:
-            user.hold = 0
-        elif user.hold > 1.3 * allocation:
-            user.hold -= 1.3 * allocation
+        if user.hold <= Decimal(1.3) * allocation:
+            user.hold = Decimal(0)
+        elif user.hold > Decimal(1.3) * allocation:
+            user.hold -= Decimal(1.3) * allocation
+    print(33)
     user.can_invite = True
-    user.status = 'A'
+    user.status = 'P'
+    user.save()
 
 
 def count_referal_hold(user: User, allocation):
     if user.hold:
         if allocation > user.hold:
-            referal = (allocation - user.hold) * 0.05
-            user.hold = 0
+            referal = (Decimal(allocation) - user.hold) * Decimal(0.05)
+            user.hold = Decimal(0)
         else:
-            referal = 0
-            user.hold -= allocation
+            referal = Decimal(0)
+            user.hold -= Decimal(allocation)
     else:
-        referal = allocation * 0.05
+        referal = Decimal(allocation) * Decimal(0.05)
     return referal
 
 
 def delete_participant(participant, allocation):
     referal = count_referal_hold(participant.user,
                                  allocation)
-    referal = (allocation - user.hold) * 0.05
-    takeoff_admin_wallet(int(allocation * 0.3))
+    referal = (Decimal(allocation) - user.hold) * Decimal(0.05)
+    takeoff_admin_wallet(Decimal(allocation) * Decimal(0.3))
     if referal and participant.user.inviter:
         decline_ido_part_referal(participant.user,
                                  referal, participant.date)
-    participant.user.balance += 1.3 * allocation
+    participant.user.balance += Decimal(1.3) * Decimal(allocation)
     participant.delete()

@@ -1,4 +1,5 @@
-import queue
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.db.models import Max
 from rest_framework.status import (HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN,
@@ -236,7 +237,7 @@ class ParticipateIDOView(GenericAPIView):
 
             ido = serializer.validated_data
 
-            if user.balance < 651 or user.balance < 1.3 * ido.person_allocation + 1:
+            if user.balance < 651 or user.balance < Decimal(1.3) * Decimal(ido.person_allocation) + Decimal(1):
                 return Response(
                     {'error': 'У пользователя недостаточно средств на счете.'},
                     status=HTTP_400_BAD_REQUEST

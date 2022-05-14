@@ -6,7 +6,8 @@ from .views import (GetTgCodeView, RegisterUserView, LoginUserView,
                     CheckResetTokenView, ChangeUserPasswordView,
                     GenerateGoogleQRView, VerifyGoogleCodeView,
                     RetrievePermissionsView, RetrieveUserInfoView,
-                    RetrieveUserPartnersView)
+                    RetrieveUserPartnersView, DashboardView,
+                    DashboardReferalChargesView, UserIDOsView)
 
 
 urlpatterns = [
@@ -32,4 +33,9 @@ urlpatterns = [
     path('reset_password_confirm/', CheckResetTokenView.as_view(), name='reset_password_confirm'),
     path('reset_password/', ResetPasswordView.as_view(), name='reset_password'),
     path('change_password/', ChangeUserPasswordView.as_view(), name='change_password'),
+
+    path('dashboard_referal_table/', DashboardReferalChargesView.as_view(), name='dashboard_referal_table'),
+    path('dashboard/', DashboardView.as_view(), name='dashboard'),
+
+    path('idos/', UserIDOsView.as_view(), name='idos'),
 ]

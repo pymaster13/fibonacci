@@ -15,8 +15,9 @@ class Coin(models.Model):
     network = models.CharField(max_length=128,
                                unique=True,
                                verbose_name='Coin network')
-    cost_in_busd = models.FloatField(null=True, blank=True,
-                                     verbose_name='BUSD cost')
+    cost_in_busd = models.DecimalField(null=True, blank=True, max_digits=100,
+                                       decimal_places=50,
+                                       verbose_name='BUSD cost')
 
     def __str__(self):
         return self.name
@@ -94,7 +95,7 @@ class Transaction(models.Model):
                                  decimal_places=50,
                                  verbose_name='Transaction amount (volume)')
     commission = models.DecimalField(null=True, blank=True, max_digits=100,
-                                     decimal_places=50,
+                                     decimal_places=50, default=0,
                                      verbose_name='Transaction commission')
     referal = models.BooleanField(default=False)
     received = models.BooleanField(default=False)

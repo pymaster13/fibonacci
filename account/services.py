@@ -85,7 +85,7 @@ def verify_google_code(token, code):
 
 def retrieve_permissions(user):
     """Help function to retrieve user permissions."""
-    permissions_db = ("ido", "transaction", "user", "news")
+    permissions_db = ("ido", "transaction", "user", "news", 'statistics')
     try:
         permissions = set()
         for perm in user.user_permissions.all():
