@@ -734,15 +734,28 @@
 			"item": [
 				{
 					"name": "List IDO",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 34e9e6b74b83a29fb88137ee085945441a84bda6b9ccbefe96143a7f688813ff",
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "page",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
 						"url": {
 							"raw": "localhost:8000/api/v1/ido/",
 							"host": [
@@ -766,12 +779,12 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 34e9e6b74b83a29fb88137ee085945441a84bda6b9ccbefe96143a7f688813ff",
 								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "localhost:8000/api/v1/ido/3/",
+							"raw": "localhost:8000/api/v1/ido/56/",
 							"host": [
 								"localhost"
 							],
@@ -780,7 +793,7 @@
 								"api",
 								"v1",
 								"ido",
-								"3",
+								"56",
 								""
 							]
 						}
@@ -833,7 +846,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
+								"value": "Token a74e1f30f01ab490c68175c53a80f72acbbffedbf40eca06f0f481cebe3c5092",
 								"type": "text"
 							},
 							{
@@ -845,7 +858,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"IDO_1\",\n    \"description\": \"IDO_1\",\n    \"general_allocation\": 1000,\n    \"person_allocation\": 500,\n    \"buy_date\": \"2000-01-01\",\n    \"tge\": \"2000-01-02\",\n    \"vesting\": \"2000-01-03\",\n    \"coin\": \"qq1\",\n    \"coin_network\": \"qq1\",\n    \"commission\": 2,\n    \"smartcontract\": \"\",\n    \"exchange\": \"Binance\",\n    \"without_pay\": false,\n    \"charge_manually\": false\n}",
+							"raw": "{\n    \"name\": \"IDO_223344\",\n    \"description\": \"IDO_1\",\n    \"general_allocation\": 1000,\n    \"person_allocation\": 500,\n    \"buy_date\": \"2000-01-01\",\n    \"tge\": \"2000-01-02\",\n    \"vesting\": \"2000-01-03\",\n    \"coin\": \"qq1112334\",\n    \"coin_network\": \"qq1112334\",\n    \"commission\": 2,\n    \"smartcontract\": \"\",\n    \"exchange\": \"Binance\",\n    \"without_pay\": false,\n    \"charge_manually\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -876,27 +889,22 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token 144bd2429058f2cfff259c8f3a8ed8d48cf64ec2f7a31c77aaa6855617285db5",
+								"value": "Token 9caefdd8ebe420458efd471d4a44c8ce94227eeff1ba68f629f35a502ba64e3d",
 								"type": "text"
 							},
 							{
-								"key": "Authorization",
-								"value": "Token 217c2a5c64ab9e9894e3c738424e3d18b3155adca49b20da3dc95030ca9690ea",
+								"key": "Transfer-Encoding",
+								"value": "image/jpeg",
 								"type": "text",
 								"disabled": true
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"IDO_1\",\n    \"description\": \"IDO_1\",\n    \"general_allocation\": 1000,\n    \"person_allocation\": 500,\n    \"buy_date\": \"2000-01-01\",\n    \"tge\": \"2000-01-02\",\n    \"vesting\": \"2000-01-03\",\n    \"coin\": \"BO111\",\n    \"coin_network\": \"BOP2111\",\n    \"commission\": 2,\n    \"smartcontract\": \"\",\n    \"exchange\": \"Binance\",\n    \"without_pay\": true,\n    \"charge_manually\": false,\n    \"users\": [\"44@ya.ru\"],\n    \"allocations\": [500]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"name\": \"IDO_1\",\n    \"description\": \"IDO_1\",\n    \"general_allocation\": 1000,\n    \"person_allocation\": 500,\n    \"buy_date\": \"2000-01-01\",\n    \"tge\": \"2000-01-02\",\n    \"vesting\": \"2000-01-03\",\n    \"coin\": \"BO1111123\",\n    \"coin_network\": \"BOP2113231\",\n    \"commission\": 2,\n    \"smartcontract\": \"\",\n    \"exchange\": \"Binance\",\n    \"without_pay\": true,\n    \"charge_manually\": false\n}"
 						},
 						"url": {
-							"raw": "localhost:8000/api/v1/ido/update/37/",
+							"raw": "localhost:8000/api/v1/ido/update/56/",
 							"host": [
 								"localhost"
 							],
@@ -906,7 +914,7 @@
 								"v1",
 								"ido",
 								"update",
-								"37",
+								"56",
 								""
 							]
 						}
@@ -1128,7 +1136,7 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Token 9abac5da2db83cf2afd6f1d9f8e7780ebaa98cea2990917ded1f89e8d09e4127",
+								"value": "Token 34e9e6b74b83a29fb88137ee085945441a84bda6b9ccbefe96143a7f688813ff",
 								"type": "text"
 							}
 						],
@@ -1672,7 +1680,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token ab7bd22e4e2dbf82a1221294217570c3633832d353ff0dea0eea3ded345abb21",
+								"value": "Token 34e9e6b74b83a29fb88137ee085945441a84bda6b9ccbefe96143a7f688813ff",
 								"type": "text"
 							},
 							{
@@ -1684,7 +1692,14 @@
 						],
 						"body": {
 							"mode": "formdata",
-							"formdata": []
+							"formdata": [
+								{
+									"key": "page",
+									"value": "3",
+									"type": "text",
+									"disabled": true
+								}
+							]
 						},
 						"url": {
 							"raw": "localhost:8000/api/v1/account/idos/",
@@ -1852,7 +1867,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token 5a59c2155241f57d51e3238034011cf29c4597469770b62feb83131ac93e4cb5",
+								"value": "Token 34e9e6b74b83a29fb88137ee085945441a84bda6b9ccbefe96143a7f688813ff",
 								"type": "text"
 							},
 							{
@@ -2061,7 +2076,7 @@
 								},
 								{
 									"key": "code",
-									"value": "446856\n",
+									"value": "321711\n",
 									"type": "text"
 								},
 								{
@@ -2423,6 +2438,198 @@
 					"response": []
 				},
 				{
+					"name": "Retrieve users permissions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9caefdd8ebe420458efd471d4a44c8ce94227eeff1ba68f629f35a502ba64e3d",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/retrieve_users_permissions/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"retrieve_users_permissions",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve vip-users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9caefdd8ebe420458efd471d4a44c8ce94227eeff1ba68f629f35a502ba64e3d",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/retrieve_vip_users/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"retrieve_vip_users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve users priorities",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9caefdd8ebe420458efd471d4a44c8ce94227eeff1ba68f629f35a502ba64e3d",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/retrieve_users_priorities/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"retrieve_users_priorities",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve users structure (stats)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9caefdd8ebe420458efd471d4a44c8ce94227eeff1ba68f629f35a502ba64e3d",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/retrieve_users_partners/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"retrieve_users_partners",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Statistics",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -2562,6 +2769,59 @@
 								"v1",
 								"admin",
 								"stats_by_range_days",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statistics AKV income by months",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9caefdd8ebe420458efd471d4a44c8ce94227eeff1ba68f629f35a502ba64e3d",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "date_in_str_from",
+									"value": "15-05-2022",
+									"type": "text"
+								},
+								{
+									"key": "date_in_str_to",
+									"value": "16-05-2022",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/stats_akv_income/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"stats_akv_income",
 								""
 							]
 						}
