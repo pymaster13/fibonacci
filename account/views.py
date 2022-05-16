@@ -356,10 +356,14 @@ class RetrieveUserInfoView(GenericAPIView):
         data['telegram']['is_confirmed'] = user.telegram.is_confirmed
         data['telegram']['nickname'] = user.telegram.tg_nickname
 
-        data['inviter'] = {}
-        data['inviter']['id'] = user.inviter.id
-        data['inviter']['email'] = user.inviter.email
-        data['inviter']['telegram'] = user.inviter.telegram.tg_nickname
+        if user.inviter:
+            data['inviter'] = {}
+            data['inviter']['id'] = user.inviter.id
+            data['inviter']['email'] = user.inviter.email
+            if user.inviter.telegram:
+                data['inviter']['telegram'] = user.inviter.telegram.tg_nickname
+            else:
+                data['inviter']['telegram'] = None
 
         return Response(data, status=HTTP_200_OK)
 
