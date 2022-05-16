@@ -2,6 +2,8 @@
 import io
 from datetime import datetime as dt, timezone
 from random import randint
+from math import ceil
+from typing import Tuple
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -101,3 +103,22 @@ def retrieve_permissions(user):
     except Exception as e:
         print(e)
         raise RetrievePermissionsError("Ошибка получения прав пользователя.")
+
+
+def paginate(items: list, objects_on_page: int, current_page: int) -> Tuple[list, int, int]:
+    if not items:
+        return [], 1, 1
+
+    count_pages = ceil(len(items) / objects_on_page)
+
+    if current_page <= 0:
+        return items[:objects_on_page], count_pages, 1
+
+    if current_page > count_pages:
+        return [], count_pages, current_page
+    elif current_page == count_pages:
+        return items[(current_page-1)*objects_on_page:], count_pages, current_page
+    else:
+        return (items[(current_page-1)*objects_on_page:current_page*objects_on_page],
+               count_pages,
+               current_page)

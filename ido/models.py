@@ -70,6 +70,7 @@ class IDO(models.Model):
     charge_manually = models.BooleanField(default=False)
 
     image = models.ImageField(upload_to='ido/', null=True, blank=True)
+    # image = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "IDO"

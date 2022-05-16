@@ -25,7 +25,7 @@ from .serializers import (RegisterUserSerializer, LoginUserSerializer,
                           EmailSerializer, ChangePasswordSerializer,
                           ResetPasswordTokenSerializer, GoogleCodeSerializer,
                           UserSerializer)
-from .services import (generate_code, check_code_time,
+from .services import (generate_code, check_code_time, paginate,
                        verify_google_code, send_mail_message,
                        generate_google_qrcode, retrieve_permissions)
 from administrator.services import retrieve_users_info
@@ -511,9 +511,9 @@ class UserIDOsView(GenericAPIView):
             return Response({
                 "error": 'У пользователя нет прав на просмотр IDO.'
                 }, status=HTTP_403_FORBIDDEN)
-        
+
         result = []
-        
+
         try:
             idos = IDOParticipant.objects.filter(user=user)
             if idos:
@@ -527,7 +527,13 @@ class UserIDOsView(GenericAPIView):
             return Response({"error": "Ошибка получения информации об IDO пользователя."},
                             status=HTTP_400_BAD_REQUEST)
 
-        return Response({'user_idos': result})
+        result, count_pages, current_page = paginate(result,
+                                                     3,
+                                                     int(request.data.get('page', 1)))
+
+        return Response({'user_idos': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})
 
 
 class UserIDOsStatsView(GenericAPIView):
@@ -586,7 +592,13 @@ class UserIDOsStatsView(GenericAPIView):
             return Response({"error": "Ошибка получения информации об IDO пользователя."},
                             status=HTTP_400_BAD_REQUEST)
 
-        return Response({'idos_stats': result})
+        result, count_pages, current_page = paginate(result,
+                                                     10,
+                                                     int(request.data.get('page', 1)))
+
+        return Response({'idos_stats': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})
 
 
 class UserPartnersStatsView(GenericAPIView):
@@ -603,8 +615,18 @@ class UserPartnersStatsView(GenericAPIView):
                     }, status=HTTP_403_FORBIDDEN)
 
         partners = user.partners['partners']
+        print(partners)
         if partners:
-            return Response(partners)
+            partners, count_pages, current_page = paginate(
+                                                    partners,
+                                                    10,
+                                                    int(request.data.get('page', 1))
+                                                )
+
+            return Response({'partners': partners,
+                             'count_pages': count_pages,
+                             'current_page': current_page})
+
         else:
             return Response({"result": "У пользователя нет партнеров."})
 
@@ -673,4 +695,12 @@ class ReferalChargesView(GenericAPIView):
                     'from': wallet_from.user.email,
                 })
 
-        return Response({"referal_charges": result})
+        result, count_pages, current_page = paginate(
+                                                result,
+                                                1,
+                                                int(request.data.get('page', 1))
+                                            )
+
+        return Response({'referal_charges': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})

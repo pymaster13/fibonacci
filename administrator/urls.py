@@ -2,11 +2,14 @@ from django.urls import path
 
 from .views import (LoginAdminUserView, GrantPermissionsView,
                     Reset2FAView, AllowUserInviteView, AddVIPUserView,
-                    DeleteVIPUserView, SetUserPermanentPlaceView,
+                    DeleteVIPUserView, RetrieveAllUsersPriorities,
                     GetUserIDOView, RetrieveUsersInformationView,
                     CreateCustomTokenWalletView, AdminStatsView,
                     AdminReportByDayView, AdminReportByRangeDaysView,
-                    AdminStatsByClickUserView)
+                    AdminStatsByClickUserView, RetrieveAllUsersPermissions,
+                    SetUserPermanentPlaceView, UsersPartnersStatsView,
+                    RetrieveAllVIPUsers, AdminStatsAKVIncomeView,
+                    )
 
 urlpatterns = [
     path('login_admin_2fa/', LoginAdminUserView.as_view(), name='login_admin_2fa'),
@@ -26,6 +29,12 @@ urlpatterns = [
 
     path('stats/', AdminStatsView.as_view(), name='stats'),
     path('stats_by_day/', AdminReportByDayView.as_view(), name='stats_by_day'),
+    path('stats_akv_income/', AdminStatsAKVIncomeView.as_view(), name='stats_akv_income'),
     path('stats_by_range_days/', AdminReportByRangeDaysView.as_view(), name='stats_by_range_days'),
     path('stats_user_by_click/', AdminStatsByClickUserView.as_view(), name='stats_user_by_click'),
+
+    path('retrieve_users_permissions/', RetrieveAllUsersPermissions.as_view(), name='retrieve_users_permissions'),
+    path('retrieve_vip_users/', RetrieveAllVIPUsers.as_view(), name='retrieve_vip_users'),
+    path('retrieve_users_priorities/', RetrieveAllUsersPriorities.as_view(), name='retrieve_users_priorities'),
+    path('retrieve_users_partners/', UsersPartnersStatsView.as_view(), name='retrieve_users_partners'),
 ]

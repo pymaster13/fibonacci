@@ -70,6 +70,7 @@ def process_ido_data(request_query_dict: dict):
             users_obj.append(user)
 
     allocations = data.pop('allocations', [])
+
     data.update(tmp_data)
 
     return data, users_obj, allocations

@@ -3,6 +3,9 @@ from time import sleep
 
 from django.contrib.auth import get_user_model
 from django.db.models import Max
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from requests import request
 from rest_framework.status import (HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN,
                                    HTTP_200_OK, HTTP_204_NO_CONTENT,
                                    HTTP_201_CREATED)
@@ -11,6 +14,7 @@ from rest_framework.generics import (CreateAPIView, RetrieveAPIView,
                                      ListAPIView, GenericAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from account.services import paginate
 from core.exceptions import AdminWalletIsEmptyError
 
 from core.models import AdminWallet, Coin, MetamaskWallet, Transaction, Address
@@ -27,21 +31,62 @@ from .services import (decline_ido_part_referal, delete_participant, process_ido
 User = get_user_model()
 
 
-class IDORetrieveView(RetrieveAPIView):
+class IDORetrieveView(GenericAPIView):
     """API endpoint for retrieving IDOs."""
 
-    queryset = IDO.objects.all()
     serializer_class = PureIDOSerializer
     permission_classes = (IsAuthenticated,)
-    lookup_field = 'pk'
+
+    def get(self, request, **kwargs):
+
+        if not kwargs.get('pk'):
+            return Response('Не указан параметр "pk".', status=HTTP_400_BAD_REQUEST)
+
+        try:
+            ido = IDO.objects.get(pk=kwargs.get('pk'))
+        except Exception:
+            return Response('Указан некорректный параметр pk.', status=HTTP_400_BAD_REQUEST)
+
+        data = PureIDOSerializer(ido).data
+        if ido.smartcontract:
+            data['smartcontract'] = ido.smartcontract.address
+        if ido.exchange:
+            data['exchange'] = ido.exchange.reference
+        if ido.coin:
+            data['coin'] = {}
+            data['coin']['name'] = ido.coin.name
+            data['coin']['network'] = ido.coin.network
+
+        return JsonResponse(data)
 
 
-class IDOListView(ListAPIView):
+class IDOListView(GenericAPIView):
     """API endpoint for showing all IDOs."""
 
-    queryset = IDO.objects.all()
     serializer_class = PureIDOSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        idos = IDO.objects.all()
+
+        result = []
+
+        if idos:
+            for ido in idos:
+                data = PureIDOSerializer(ido).data
+                if ido.smartcontract:
+                    data['smartcontract'] = ido.smartcontract.address
+                if ido.exchange:
+                    data['exchange'] = ido.exchange.reference
+                if ido.coin:
+                    data['coin'] = {}
+                    data['coin']['name'] = ido.coin.name
+                    data['coin']['network'] = ido.coin.network
+
+                result.append(data)
+
+        return Response({'idos': result})
 
 
 class IDOCreateView(CreateAPIView):
@@ -136,6 +181,8 @@ class IDOUpdateView(UpdateAPIView):
                                            data=data,
                                            partial=partial)
             serializer.is_valid(raise_exception=True)
+
+
             self.perform_update(serializer)
 
             if getattr(instance, '_prefetched_objects_cache', None):

@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import exception
 from re import X
 from django.contrib.auth import get_user_model
@@ -5,14 +6,15 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_400_BAD_REQUEST,
+                                   HTTP_403_FORBIDDEN,
                                    HTTP_200_OK)
 from knox.models import AuthToken
 
-from account.exceptions import (LoginUserError, EmailValidationError,
+from account.exceptions import (LoginUserError, EmailValidationError, RetrievePermissionsError,
                                 UserDoesNotExists)
 from account.models import GoogleAuth
 from account.serializers import EmailSerializer
-from account.services import verify_google_code
+from account.services import paginate, retrieve_permissions, verify_google_code
 from .exceptions import GrantPermissionsError, IncorrectDateError
 from .models import VIPUser
 from .serializers import (PermissionsSerializer, LoginAdminSerializer,
@@ -371,7 +373,42 @@ class AdminStatsView(GenericAPIView):
         else:
             return Response({
                 "error": 'У пользователя нет прав на получение статистики.'},
-                status=HTTP_400_BAD_REQUEST)
+                status=HTTP_403_FORBIDDEN)
+
+
+class AdminStatsAKVIncomeView(GenericAPIView):
+    """API endpoint to retrive akv incomes by months."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        user = User.objects.get(email=request.user)
+        if user.has_perm('statistics.add_statistics') or user.is_superuser:
+            current_year = datetime.now().year
+            months = range(1, 13)
+            months_slug = ('Январь', 'Февраль', 'Март', 'Апрель',
+                           'Май', 'Июнь', 'Июль', 'Август',
+                           'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь')
+
+            coin = Coin.objects.get(name='BUSD')
+
+            result = {}
+
+            for index, month in enumerate(months):
+                transactions = Transaction.objects.filter(coin=coin,
+                                                          commission=True,
+                                                          date__month=month,
+                                                          date__year=current_year)
+                akv_income_by_day = sum(t.amount for t in transactions if t.amount)
+
+                result[months_slug[index]] = akv_income_by_day
+
+            return Response(result)
+        else:
+            return Response({
+                "error": 'У пользователя нет прав на получение статистики.'},
+                status=HTTP_403_FORBIDDEN)
 
 
 class AdminReportByDayView(GenericAPIView):
@@ -432,7 +469,7 @@ class AdminReportByDayView(GenericAPIView):
         else:
             return Response({
                 "error": 'У пользователя нет прав на получение статистики.'},
-                status=HTTP_400_BAD_REQUEST)
+                status=HTTP_403_FORBIDDEN)
 
 
 class AdminReportByRangeDaysView(GenericAPIView):
@@ -487,7 +524,7 @@ class AdminReportByRangeDaysView(GenericAPIView):
         else:
             return Response({
                 "error": 'У пользователя нет прав на получение статистики.'},
-                status=HTTP_400_BAD_REQUEST)
+                status=HTTP_403_FORBIDDEN)
 
 
 class AdminStatsByClickUserView(GenericAPIView):
@@ -497,6 +534,14 @@ class AdminStatsByClickUserView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+
+        user = User.objects.get(email=request.user)
+        if not user.has_perm('user.add_user'):
+            if not user.is_superuser:
+                return Response({
+                    "error": 'У пользователя нет прав на получение информации о пользователях.'},
+                    status=HTTP_403_FORBIDDEN)
+
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -543,3 +588,130 @@ class AdminStatsByClickUserView(GenericAPIView):
                             status=HTTP_400_BAD_REQUEST)
 
         return Response({'idos_stats': result})
+
+
+class RetrieveAllUsersPermissions(GenericAPIView):
+    """API endpoint to retrieve info about users permissions."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        user = User.objects.get(email=request.user)
+        if not user.has_perm('user.add_user'):
+            if not user.is_superuser:
+                return Response({
+                    "error": 'У пользователя нет прав на получение информации о пользователях.'},
+                    status=HTTP_403_FORBIDDEN)
+
+        result = []
+
+        users = User.objects.all().order_by('email')
+        for user in users:
+            try:
+                permissions = retrieve_permissions(user)
+            except RetrievePermissionsError as e:
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            else:
+                if permissions:
+                    result.append({user.email: permissions})
+
+        result, count_pages, current_page = paginate(result,
+                                                     6,
+                                                     int(request.data.get('page', 1)))
+
+        return Response({'users': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})
+
+
+class RetrieveAllVIPUsers(GenericAPIView):
+    """API endpoint to retrieve info about vip-users."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        user = User.objects.get(email=request.user)
+        if not user.has_perm('user.add_user'):
+            if not user.is_superuser:
+                return Response({
+                    "error": 'У пользователя нет прав на получение информации о пользователях.'},
+                    status=HTTP_403_FORBIDDEN)
+
+        result = []
+
+        vip_users = VIPUser.objects.all()
+        for vip_user in vip_users:
+            result.append({vip_user.user.email: vip_user.referal_profit})
+
+        result, count_pages, current_page = paginate(result,
+                                                     6,
+                                                     int(request.data.get('page', 1)))
+
+        return Response({'users': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})
+
+
+class RetrieveAllUsersPriorities(GenericAPIView):
+    """API endpoint to retrieve info about users priorities."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        user = User.objects.get(email=request.user)
+        if not user.has_perm('user.add_user'):
+            if not user.is_superuser:
+                return Response({
+                    "error": 'У пользователя нет прав на получение информации о пользователях.'},
+                    status=HTTP_403_FORBIDDEN)
+
+        result = []
+
+        users = User.objects.all()
+        for user in users:
+            if user.permanent_place:
+                result.append({user.email: user.permanent_place})
+
+        result, count_pages, current_page = paginate(result,
+                                                     6,
+                                                     int(request.data.get('page', 1)))
+
+        return Response({'users': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})
+
+
+class UsersPartnersStatsView(GenericAPIView):
+    """API endpoint to show users partners."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(email=request.user)
+        if not user.has_perm('user.add_user'):
+            if not user.is_superuser:
+                return Response({
+                    "error": 'У пользователя нет прав на получение информации о пользователях.'},
+                    status=HTTP_403_FORBIDDEN)
+
+        result = []
+
+        users = User.objects.all()
+        for user in users:
+            dict_user = {}
+            dict_user['info'] = user.as_json()
+            dict_user['stats'] = user.partners['stats']
+            result.append(dict_user)
+
+        result, count_pages, current_page = paginate(
+                                                result,
+                                                10,
+                                                int(request.data.get('page', 1))
+                                            )
+
+        return Response({'users': result,
+                         'count_pages': count_pages,
+                         'current_page': current_page})

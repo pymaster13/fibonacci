@@ -90,10 +90,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     def retrieve_all_user_partners(user, partners=None, to_check=None,
                                    active=0, passive=0, nonactive=0):
         if not partners and not to_check:
-            partners = {}
+            partners = []
             to_check = []
 
         invited_users = User.objects.filter(inviter=user)
+
 
         if invited_users or to_check:
             if invited_users:
@@ -101,9 +102,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
             next_user = to_check.pop()
 
-            if not partners.get(next_user.line):
-                partners[next_user.line] = []
-            partners[next_user.line].append(next_user.as_json())
+            partners.append(next_user.as_json())
 
             if next_user.status == 'A':
                 active += 1
@@ -178,7 +177,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'email': self.email,
             'fio': self.fio,
             'status': self.full_status,
-            'telegram': self.telegram.tg_nickname,
+            'telegram': self.telegram.tg_nickname if self.telegram else '',
             'balance': self.balance,
             'line': self.line,
             'referal': self.partners,
