@@ -350,8 +350,18 @@ class RetrieveUserInfoView(GenericAPIView):
     def get(self, request):
         user = User.objects.get(email=request.user)
         serializer = self.get_serializer(user)
+        data = serializer.data
 
-        return Response(serializer.data, status=HTTP_200_OK)
+        data['telegram'] = {}
+        data['telegram']['is_confirmed'] = user.telegram.is_confirmed
+        data['telegram']['nickname'] = user.telegram.tg_nickname
+
+        data['inviter'] = {}
+        data['inviter']['id'] = user.inviter.id
+        data['inviter']['email'] = user.inviter.email
+        data['inviter']['telegram'] = user.inviter.telegram.tg_nickname
+
+        return Response(data, status=HTTP_200_OK)
 
 
 class RetrieveUserPartnersView(GenericAPIView):
