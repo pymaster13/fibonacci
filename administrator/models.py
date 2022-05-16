@@ -11,5 +11,6 @@ class VIPUser(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              verbose_name="User")
-    referal_profit = models.FloatField(null=True, blank=True,
+    referal_profit = models.FloatField(null=True,
+                                       blank=True,
                                        verbose_name="referal IDO income percent")

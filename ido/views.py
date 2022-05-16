@@ -85,18 +85,10 @@ class IDOCreateView(CreateAPIView):
                             )
 
                         for user, allocation in zip(users, allocations):
-                            referal = count_referal_hold(user, allocation)
-                            participate_ido(user, ido, allocation)
-                            fill_admin_wallet(int(allocation * 0.3))
-                            if referal and user.inviter:
-                                realize_ido_part_referal(user, referal)
+                            participate_ido(user, ido, allocation, wo_pay=True)
                     else:
                         for user_ in users:
-                            referal = count_referal_hold(user, ido.person_allocation)
-                            participate_ido(user_, ido, ido.person_allocation)
-                            fill_admin_wallet(int(ido.person_allocation * 0.3))
-                            if referal and user_.inviter:
-                                realize_ido_part_referal(user_, referal)
+                            participate_ido(user_, ido, ido.person_allocation, wo_pay=True)
                 except Exception as e:
                     print(e)
                     ido.delete()
@@ -155,41 +147,26 @@ class IDOUpdateView(UpdateAPIView):
                                         )
                 for existed_user in existed_users:
                     if existed_user.user not in users:
-                        existed_user.user.hold += existed_user.allocation
-                        existed_user.user.balance += 1.3 * existed_user.allocation
-                        existed_user.user.save()
-                        takeoff_admin_wallet(int(existed_user.allocation * 0.3))
                         existed_user.delete()
 
                 ex_users = [ex_user.user for ex_user in existed_users]
 
-                print(111)
-
                 if allocations:
                     for user, allocation in zip(users, allocations):
                         if user not in ex_users:
-                            referal = count_referal_hold(user, allocation)
-                            participate_ido(user, instance, allocation, True)
-                            fill_admin_wallet(int(allocation * 0.3))
-                            if referal and user.inviter:
-                                realize_ido_part_referal(user, referal)
+                            participate_ido(user, instance, allocation, wo_pay=True)
                 else:
                     for user_ in users:
-                        referal = count_referal_hold(user_,
-                                                     instance.person_allocation)
                         participate_ido(user_, instance,
                                         instance.person_allocation,
-                                        True)
-                        fill_admin_wallet(int(instance.person_allocation * 0.3))
-                        if referal and user_.inviter:
-                            realize_ido_part_referal(user_, referal)
+                                        wo_pay=True)
 
             else:
                 for part in IDOParticipant.objects.filter(ido=instance):
                     part.user.hold += part.allocation
-                    part.user.balance += 1.3 * part.allocation
+                    part.user.balance += Decimal(1.3 * part.allocation)
                     part.user.save()
-                    takeoff_admin_wallet(int(part.allocation * 0.3))
+                    takeoff_admin_wallet(part.allocation * Decimal(0.3))
                     part.delete()
 
             return Response(serializer.data,
@@ -212,14 +189,19 @@ class IDODeleteView(DestroyAPIView):
         user = User.objects.get(email=request.user)
         if user.has_perm('ido.delete_ido') or user.is_superuser:
             instance = self.get_object()
+            participants = IDOParticipant.objects.filter(ido=instance)
+            if instance.without_pay:
+                for part in participants:
+                    part.delete()
+            else:
+                for part in participants:
+                    part.user.hold += Decimal(part.allocation)
+                    part.user.balance += Decimal(part.allocation)
+                    part.user.save()
+                    part.delete()
             self.perform_destroy(instance)
-
-            for part in IDOParticipant.objects.filter(ido=instance):
-                part.user.hold += part.allocation
-                part.user.balance += part.allocation
-                part.user.save()
-                part.delete()
             return Response(status=HTTP_204_NO_CONTENT)
+
 
         return Response({
                 "error": 'У пользователя нет прав на удаление IDO.'
@@ -235,8 +217,11 @@ class ParticipateIDOView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
-        # try:
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except IDOExistsError as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
         user = User.objects.get(email=request.user)
 
         ido = serializer.validated_data
@@ -263,32 +248,25 @@ class ParticipateIDOView(GenericAPIView):
         participants = IDOParticipant.objects.filter(ido=ido)
         used_allocation = len(participants) * ido.person_allocation
 
-        referal = count_referal_hold(user, ido.person_allocation)
-
-        print(11)
         if ido.general_allocation - used_allocation >= ido.person_allocation:
             try:
                 participate_ido(user, ido, ido.person_allocation)
-                print(22)
+                referal = count_referal_hold(user, ido.person_allocation)
             except Exception as e:
                 print(e)
                 return Response(
-                    {'error': 'Вы уже участвуете в данном IDO.'},
+                    {'error': 'Ошибка при попытке участия в данном IDO.'},
                     status=HTTP_400_BAD_REQUEST
                 )
 
             else:
-                print(33)
-                if referal and user.inviter:
-                    realize_ido_part_referal(user, referal)
-                    print(444444)
-                    print(type(ido.person_allocation))
-                    print(type(referal))
-                    diff = float(ido.person_allocation) * 0.3 - float(referal)
-                    fill_admin_wallet(user, float(ido.person_allocation), diff)
-                else:
-                    print(55)
-                    fill_admin_wallet(user, float(ido.person_allocation), ido.person_allocation * 0.3)
+                if float(referal): 
+                    if user.inviter:
+                        realize_ido_part_referal(user, referal)
+                        diff = Decimal(ido.person_allocation) * Decimal(0.3) - referal
+                        fill_admin_wallet(user, diff)
+                    else:
+                        fill_admin_wallet(user, Decimal(ido.person_allocation) * Decimal(0.3))
 
                 return Response({'status': 'success'})
 
@@ -402,8 +380,6 @@ class ChargeTokensManuallyView(GenericAPIView):
             busd_amount, ido = serializer.validated_data
             amount = Decimal(busd_amount)/ido.coin.cost_in_busd
 
-            print(amount, ido)
-
             if not ido.smartcontract:
                 return Response(
                     {'error': 'Смартконтракт IDO не указан.'},
@@ -419,10 +395,8 @@ class ChargeTokensManuallyView(GenericAPIView):
                                           owner_admin=True)
 
             admin_wallet = AdminWallet.objects.get(wallet_address=address)
-            print(f'{amount=}')
 
             ido_participants = IDOParticipant.objects.filter(ido=ido)
-            print(ido_participants)
             if ido_participants:
                 for part in ido_participants:
                         amount_user = referal_by_income(
@@ -430,8 +404,6 @@ class ChargeTokensManuallyView(GenericAPIView):
                             admin_wallet=admin_wallet,
                             smartcontract=ido.smartcontract,
                             tokens=amount)
-
-                        print('result_amount', amount_user)
 
                         part_metamask = MetamaskWallet.objects.get(user=part.user)
 
@@ -476,7 +448,6 @@ class ChargeRefundAllocationView(GenericAPIView):
             amount, ido = serializer.validated_data
 
             ido_participants = IDOParticipant.objects.filter(ido=ido)
-            print(ido_participants)
             if ido_participants:
                 for part in ido_participants:
                     if part.refund_allocation < 650:

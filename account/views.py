@@ -545,7 +545,6 @@ class UserIDOsStatsView(GenericAPIView):
                     ts = Transaction.objects.filter(address_to=user_address,
                                                     coin=coin)
                     if ts:
-                        print(ts.filter(received=True))
                         if ts.filter(received=True):
                             received = sum(t.amount for t in ts.filter(received=True,
                                                                        visible=True))
@@ -584,9 +583,10 @@ class UserPartnersStatsView(GenericAPIView):
     def get(self, request):
         user = User.objects.get(email=request.user)
         if not user.can_invite:
-            return Response({
-                "error": 'У пользователя нет прав на получение статистики.'
-                }, status=HTTP_403_FORBIDDEN)
+            if not user.is_superuser:
+                return Response({
+                    "error": 'У пользователя нет прав на получение статистики.'
+                    }, status=HTTP_403_FORBIDDEN)
 
         partners = user.partners['partners']
         if partners:
@@ -640,10 +640,7 @@ class ReferalChargesView(GenericAPIView):
                 }, status=HTTP_403_FORBIDDEN)
 
         try:
-            print(123)
             metamask = MetamaskWallet.objects.get(user=user)
-            print(metamask.wallet_address.address)
-            print(321)
             user_address = metamask.wallet_address
         except Exception:
             Response({"error": "У пользователя не привязан кошелек Metamask."},
@@ -652,10 +649,8 @@ class ReferalChargesView(GenericAPIView):
         result = []
         transactions = Transaction.objects.filter(address_to=user_address,
                                                   referal=True)
-        print(transactions)
         if transactions:
             for ts in transactions:
-                print(ts.address_from)
                 wallet_from = MetamaskWallet.objects.get(wallet_address=ts.address_from) 
                 result.append({
                     'date': f'{ts.date.day}.{ts.date.month}.{ts.date.year}',

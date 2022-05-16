@@ -75,11 +75,11 @@ def referal_by_income(user: User, admin_wallet: AdminWallet, smartcontract: Addr
                         address_from=metamask.wallet_address,
                         address_to=admin_wallet.wallet_address,
                         coin=coin,
-                        amount=commission*tokens
+                        amount=commission*tokens,
+                        commission=True
                         )
         print(tokens, commission)
         print(tokens - commission * tokens)
-
 
         ido_participant.income_from_income += float(commission * tokens * coin.cost_in_busd)
         ido_participant.save()
@@ -181,7 +181,8 @@ def referal_by_income(user: User, admin_wallet: AdminWallet, smartcontract: Addr
                     address_from=metamask.wallet_address,
                     address_to=admin_wallet.wallet_address,
                     coin=coin,
-                    amount=tokens*(commission-summ_commission)
+                    amount=tokens*(commission-summ_commission),
+                    commission=True
                     )
     print('trans for admin')
     print(trans.amount)
@@ -191,8 +192,9 @@ def referal_by_income(user: User, admin_wallet: AdminWallet, smartcontract: Addr
     print('income from income in tokens', commission * tokens)
     print('coin', coin.name)
     print('cost', coin.cost_in_busd)
-    ido_participant.income_from_income += float(commission * tokens * coin.cost_in_busd)
-    ido_participant.save()
+    if coin.cost_in_busd:
+        ido_participant.income_from_income += float(commission * tokens * coin.cost_in_busd)
+        ido_participant.save()
     print('income in busd', ido_participant.income_from_income)
 
     return tokens - commission*tokens
@@ -214,8 +216,7 @@ def distribute_tokens(wallet: AdminWallet, smartcontract: Address, amount: Decim
             print(f'{wallet=}')
             tokens = part * amount
 
-            if participant.refund_allocation >= 650:
-                tokens = referal_by_income(participant.user, wallet, smartcontract, tokens)
+            tokens = referal_by_income(participant.user, wallet, smartcontract, tokens)
 
             print(repr(tokens))
             Transaction.objects.create(
@@ -258,7 +259,7 @@ def fill_admin_custom_wallet(wallet: AdminWallet, smartcontract: Address, amount
                                 address_to=wallet.wallet_address,
                                 coin=smartcontract.coin,
                                 amount=amount,
-                                received=True)
+                                fill_up=True)
     return transaction
 
 

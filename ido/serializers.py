@@ -44,7 +44,6 @@ class ParticipateIDOSerializer(serializers.Serializer):
             ido = IDO.objects.get(pk=attrs['ido'])
         except Exception:
             raise IDOExistsError('Указан некорректный идентификатор IDO.')
-
         return ido
 
 

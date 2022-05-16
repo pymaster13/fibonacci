@@ -1,8 +1,7 @@
 from django.contrib import admin
 
 from .models import (MetamaskWallet, Coin, AdminWallet,
-                     Exchange, Address, Transaction,
-                     AccountBalance)
+                     Exchange, Address, Transaction)
 
 
 @admin.register(MetamaskWallet)
@@ -35,10 +34,5 @@ class AdminWalletAdmin(admin.ModelAdmin):
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ('address_from', 'address_to', 'received', 'referal',
-                    'visible', 'coin', 'amount', 'commission', 'date')
-
-@admin.register(AccountBalance)
-class AccountBalanceAdmin(admin.ModelAdmin):
-    list_display = ('user', 'from_user', 'coin', 'avaliable',
-                    'received', 'refund_allocation',
-                    'income_from_income')
+                    'visible', 'fill_up', 'commission', 'coin', 'amount',
+                    'date')

@@ -19,6 +19,6 @@ class Command(BaseCommand):
 
         cron = CronTrigger(hour='*', minute='*', second='*/30', timezone=pytz.UTC)
         scheduler.add_job(periodically_run_job, cron)
-        # scheduler.add_job(periodically_run_job_2, cron)
+        scheduler.add_job(periodically_run_job_2, cron)
         print('Start scheduler')
         scheduler.start()

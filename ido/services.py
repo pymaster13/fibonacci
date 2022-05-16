@@ -23,7 +23,6 @@ def process_ido_data(request_query_dict: dict):
         return
 
     data = dict(request_query_dict)
-    print('request data', data)
 
     tmp_data = {}
 
@@ -73,33 +72,23 @@ def process_ido_data(request_query_dict: dict):
     allocations = data.pop('allocations', [])
     data.update(tmp_data)
 
-    print('result data', data)
-
     return data, users_obj, allocations
 
 
-def fill_admin_wallet(user, amount, commission):
-    print(1111)
+def fill_admin_wallet(user, amount: Decimal):
     admin_wallet = get_main_wallet()
     metamask_from = MetamaskWallet.objects.get(user=user)
     coin, _ = Coin.objects.get_or_create(name='BUSD',
                                          network='BEP20')
-    print(111)
     Transaction.objects.create(
                     address_from=metamask_from.wallet_address,
                     address_to=admin_wallet.wallet_address,
                     coin=coin,
                     amount=amount,
-                    commission=commission
+                    commission=True
                     )
-    print(222)
 
-    admin_wallet.balance += Decimal(amount)
-    print(333)
-    admin_wallet.save()
-
-
-def takeoff_admin_wallet(amount: str):
+def takeoff_admin_wallet(amount):
     admin_wallet = get_main_wallet()
     admin_wallet.balance -= Decimal(amount)
     admin_wallet.save()
@@ -122,7 +111,6 @@ def realize_ido_part_referal(user: User, referal: Decimal):
 
 
 def decline_ido_part_referal(user: User, referal, date):
-    print(user, referal, date)
     user.inviter.balance -= Decimal(referal)
     user.inviter.save()
     coin, _ = Coin.objects.get_or_create(name='BUSD',
@@ -133,31 +121,24 @@ def decline_ido_part_referal(user: User, referal, date):
                     address_from=metamask_from.wallet_address,
                     address_to=metamask_to.wallet_address,
                     coin=coin):
-        print(t.date)
         diff = t.date - date
         if diff.total_seconds() < 0.5:
-            print(diff.total_seconds())
             t.delete()
             break
 
 
 def participate_ido(user: User, ido: IDO, allocation, wo_pay=False):
-    print(11)
-    allocation = Decimal(allocation)
+    allocation = float(allocation)
     participant, _ = IDOParticipant.objects.get_or_create(
                                         user=user,
                                         ido=ido)
     participant.allocation = allocation
     participant.save()
     if not wo_pay:
-        user.balance -= Decimal(1.3) * allocation
-    print(22)
-    if user.hold:
-        if user.hold <= Decimal(1.3) * allocation:
-            user.hold = Decimal(0)
-        elif user.hold > Decimal(1.3) * allocation:
-            user.hold -= Decimal(1.3) * allocation
-    print(33)
+        if user.hold:
+            user.balance -= Decimal(allocation)
+        else:
+            user.balance -= Decimal(1.3 * allocation)
     user.can_invite = True
     user.status = 'P'
     user.save()
@@ -173,6 +154,8 @@ def count_referal_hold(user: User, allocation):
             user.hold -= Decimal(allocation)
     else:
         referal = Decimal(allocation) * Decimal(0.05)
+
+    user.save()
     return referal
 
 

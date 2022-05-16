@@ -16,12 +16,12 @@ from account.services import verify_google_code
 from .exceptions import GrantPermissionsError, IncorrectDateError
 from .models import VIPUser
 from .serializers import (PermissionsSerializer, LoginAdminSerializer,
-                          AddVIPUserSerializer, ReportDaySerializer, UserPrioritySerializer,
+                          AddVIPUserSerializer, ReportDaySerializer, ReportRangeDaysSerializer, UserPrioritySerializer,
                           AdminCustomTokenWalletSerializer)
 from .services import (grant_permissions, refresh_queue_places,
                        retrieve_users_info)
 from ido.models import IDOParticipant, QueueUser
-from core.models import Address, AdminWallet, Coin, Transaction
+from core.models import Address, AdminWallet, Coin, MetamaskWallet, Transaction
 
 
 User = get_user_model()
@@ -215,7 +215,6 @@ class SetUserPermanentPlaceView(GenericAPIView):
         user = User.objects.get(email=data['email'])
 
         if not number:
-            print(user.permanent_place)
             if not user.permanent_place:
                 return Response(
                     {"error": 'Пользователь не состоит в приоритетной очереди.'},
@@ -223,7 +222,6 @@ class SetUserPermanentPlaceView(GenericAPIView):
                 )
 
             users = User.objects.filter(permanent_place__gt=user.permanent_place)
-            print(users)
             for u in users:
                 u.permanent_place -= 1
                 u.save()
@@ -306,13 +304,11 @@ class CreateCustomTokenWalletView(GenericAPIView):
         data = serializer.validated_data
 
         smrt = Address.objects.get(address=data['smartcontract'])
-        print(smrt)
         new_admin_address = Address.objects.create(
             address=data['wallet_address'],
             coin=smrt.coin,
             owner_admin=True
         )
-        print(new_admin_address)
 
         AdminWallet.objects.create(
             wallet_address=new_admin_address,
@@ -335,9 +331,7 @@ class AdminStatsView(GenericAPIView):
 
     def get(self, request):
 
-        print(1)
         user = User.objects.get(email=request.user)
-        print(2)
         if user.has_perm('statistics.add_statistics') or user.is_superuser:
             try:
                 participants = IDOParticipant.objects.all()
@@ -346,7 +340,7 @@ class AdminStatsView(GenericAPIView):
                 count_users = len(users)
                 count_users_pool = 0
                 for user_ in users:
-                    if user_.balance > 650:
+                    if user_.balance >= 651:
                         count_users_pool += 1
                 pool = count_users_pool * 650
 
@@ -399,34 +393,22 @@ class AdminReportByDayView(GenericAPIView):
 
             day, month, year = serializer.validated_data
 
-            print(day, month, year)
-
             coin = Coin.objects.get(name='BUSD')
             admin_address = Address.objects.get(coin=coin, owner_admin=True)
-            # пополнено BUSD
-            # выведено BUSD
-            # реферальные начисления
-            # доход AKV
-            all_tr = Transaction.objects.all()
-            for t in all_tr:
-                print(t.date.day, t.date.month, t.date.year) 
             fill_busd_transactions = Transaction.objects.filter(address_to=admin_address,
                                                                 coin=coin,
-                                                                referal=False,
-                                                                commission=0.0,
+                                                                fill_up=True,
                                                                 date__day=day,
                                                                 date__month=month,
                                                                 date__year=year)
-            print(fill_busd_transactions)
             fill_reserve_by_day = sum(t.amount for t in fill_busd_transactions if t.amount)
 
             takeoff_busd_transactions = Transaction.objects.filter(address_from=admin_address,
                                                                    coin=coin,
-                                                                   referal=False,
+                                                                   received=True,
                                                                    date__day=day,
                                                                    date__month=month,
                                                                    date__year=year)
-            print(takeoff_busd_transactions)
             takeoff_reserve_by_day = sum(t.amount for t in takeoff_busd_transactions if t.amount)
 
             referals_transactions = Transaction.objects.filter(coin=coin,
@@ -436,12 +418,11 @@ class AdminReportByDayView(GenericAPIView):
                                                          date__year=year)
             referals_by_day = sum(t.amount for t in referals_transactions if t.amount)
             transactions_with_commission = Transaction.objects.filter(coin=coin,
-                                                                      commission__gt=0,
+                                                                      commission=True,
                                                                       date__day=day,
                                                                       date__month=month,
                                                                       date__year=year)
-            print(transactions_with_commission)
-            akv_income_by_day = sum(t.commission for t in transactions_with_commission if t.commission)
+            akv_income_by_day = sum(t.amount for t in transactions_with_commission if t.amount)
 
             return Response({'fill_reserve': fill_reserve_by_day,
                              'takeoff_reserve': takeoff_reserve_by_day,
@@ -452,3 +433,113 @@ class AdminReportByDayView(GenericAPIView):
             return Response({
                 "error": 'У пользователя нет прав на получение статистики.'},
                 status=HTTP_400_BAD_REQUEST)
+
+
+class AdminReportByRangeDaysView(GenericAPIView):
+    """API endpoint to retrive report statistics by range days."""
+
+    serializer_class = ReportRangeDaysSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+        user = User.objects.get(email=request.user)
+        if user.has_perm('statistics.add_statistics') or user.is_superuser:
+            serializer = self.get_serializer(data=request.data)
+            try:
+                serializer.is_valid(raise_exception=True)
+            except IncorrectDateError as e:
+                return Response({"error": str(e)},
+                                status=HTTP_400_BAD_REQUEST)
+
+            day_from, month_from, year_from, day_to, month_to, year_to  = serializer.validated_data
+            date_from = f'{year_from}-{month_from}-{day_from}'
+            date_to = f'{year_to}-{month_to}-{day_to}'
+
+            coin = Coin.objects.get(name='BUSD')
+            admin_address = Address.objects.get(coin=coin, owner_admin=True)
+            fill_busd_transactions = Transaction.objects.filter(address_to=admin_address,
+                                                                coin=coin,
+                                                                fill_up=True,
+                                                                date__range=[date_from, date_to])
+            fill_reserve_by_day = sum(t.amount for t in fill_busd_transactions if t.amount)
+
+            takeoff_busd_transactions = Transaction.objects.filter(address_from=admin_address,
+                                                                   coin=coin,
+                                                                   received=True,
+                                                                   date__range=[date_from, date_to])
+            takeoff_reserve_by_day = sum(t.amount for t in takeoff_busd_transactions if t.amount)
+
+            referals_transactions = Transaction.objects.filter(coin=coin,
+                                                         referal=True,
+                                                         date__range=[date_from, date_to])
+            referals_by_day = sum(t.amount for t in referals_transactions if t.amount)
+            transactions_with_commission = Transaction.objects.filter(coin=coin,
+                                                                      commission=True,
+                                                                      date__range=[date_from, date_to])
+            akv_income_by_day = sum(t.amount for t in transactions_with_commission if t.amount)
+
+            return Response({'fill_reserve': fill_reserve_by_day,
+                             'takeoff_reserve': takeoff_reserve_by_day,
+                             'referals': referals_by_day,
+                             'akv_income': akv_income_by_day,
+                            })
+        else:
+            return Response({
+                "error": 'У пользователя нет прав на получение статистики.'},
+                status=HTTP_400_BAD_REQUEST)
+
+
+class AdminStatsByClickUserView(GenericAPIView):
+    """API endpoint to show stats about user by click."""
+
+    serializer_class = EmailSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (EmailValidationError, UserDoesNotExists) as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        user = User.objects.get(email=serializer.validated_data['email'])
+        try:
+            metamask_user = MetamaskWallet.objects.get(user=user)
+        except Exception:
+            return Response({'error': 'У пользователя не привязан кошелек.'}, status=HTTP_400_BAD_REQUEST)
+
+        result = []
+
+        try:
+            idos = IDOParticipant.objects.filter(user=user)
+            if idos:
+                for ido_part in idos:
+                    coin = ido_part.ido.coin
+                    allocation = ido_part.allocation
+                    refund_allocation = ido_part.refund_allocation
+                    ts = Transaction.objects.filter(address_to=metamask_user.wallet_address,
+                                                    coin=coin)
+                    amount_in_tokens = sum(t.amount for t in ts if t.amount)
+                    if coin.cost_in_busd:
+                        amount_in_busd = amount_in_tokens * coin.cost_in_busd
+                    else:
+                        amount_in_busd = 0
+
+                    income_from_income = ido_part.income_from_income
+
+
+                    result.append({
+                        'coin': coin.name,
+                        'allocation': allocation,
+                        'refund_allocation': refund_allocation,
+                        'amount_in_busd': amount_in_busd,
+                        'income_from_income': income_from_income
+                    })
+
+        except Exception as e:
+            print(e)
+            return Response({"error": "Ошибка получения информации об IDO пользователя."},
+                            status=HTTP_400_BAD_REQUEST)
+
+        return Response({'idos_stats': result})

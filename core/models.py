@@ -94,37 +94,10 @@ class Transaction(models.Model):
     amount = models.DecimalField(null=True, blank=True, max_digits=100,
                                  decimal_places=50,
                                  verbose_name='Transaction amount (volume)')
-    commission = models.DecimalField(null=True, blank=True, max_digits=100,
-                                     decimal_places=50, default=0,
-                                     verbose_name='Transaction commission')
+    commission = models.BooleanField(default=False)
     referal = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
     visible = models.BooleanField(default=True)
-
-    date = models.DateTimeField(auto_now_add=True)
-
-
-class AccountBalance(models.Model):
-    """Model of account balance."""
-
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             verbose_name='Owner account',
-                             related_name='owner_account')
-    from_user = models.ForeignKey(User,
-                                  null=True,
-                                  blank=True,
-                                  on_delete=models.CASCADE,
-                                  verbose_name='Invited account',
-                                  related_name='invited_account')
-    coin = models.ForeignKey(Coin,
-                             on_delete=models.CASCADE,
-                             verbose_name='Transaction coin')
-    avaliable = models.FloatField(default=0.0, verbose_name='Available coins')
-    received = models.FloatField(default=0.0, verbose_name='Received coins')
-    refund_allocation = models.FloatField(default=0.0,
-                                          verbose_name='Refund allocation')
-    income_from_income = models.FloatField(default=0.0,
-                                           verbose_name='Income from income')
+    fill_up = models.BooleanField(default=False)
 
     date = models.DateTimeField(auto_now_add=True)

@@ -1,8 +1,9 @@
-﻿import re
+﻿import datetime
+import re
+
 from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from eth_typing import Address
 from rest_framework import serializers
 
 from account.exceptions import (EmailValidationError, LoginUserError,
@@ -122,7 +123,7 @@ class ReportDaySerializer(serializers.Serializer):
     date_in_str = serializers.CharField(
                         required=True,
                         error_messages={
-                            'blank': "Процент не может быть пустым."
+                            'blank': "Дата не может быть пустой."
                             })
 
     def validate(self, attrs):
@@ -138,3 +139,47 @@ class ReportDaySerializer(serializers.Serializer):
         year = splitted_group[2]
 
         return day, month, year
+
+
+class ReportRangeDaysSerializer(serializers.Serializer):
+    """Serializer for range days of report."""
+
+    date_in_str_from = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Дата не может быть пустой."
+                            })
+    date_in_str_to = serializers.CharField(
+                        required=True,
+                        error_messages={
+                            'blank': "Дата не может быть пустой."
+                            })
+
+    def validate(self, attrs):
+        date_in_str_from = attrs['date_in_str_from']
+        date_in_str_to = attrs['date_in_str_to']
+        result1 = re.match(r'\d{1,2}-\d{1,2}-\d{4}', date_in_str_from)
+        result2 = re.match(r'\d{1,2}-\d{1,2}-\d{4}', date_in_str_to)
+        if not result1 or not result2:
+            raise IncorrectDateError('Даты должна быть в формате dd-mm-YYYY.')
+
+        group1 = result1.group(0)
+        splitted_group1 = group1.split('-')
+        day_from = splitted_group1[0]
+        month_from = splitted_group1[1]
+        year_from = splitted_group1[2]
+
+        group2 = result2.group(0)
+        splitted_group2 = group2.split('-')
+        day_to = splitted_group2[0]
+        month_to = splitted_group2[1]
+        year_to = splitted_group2[2]
+
+        
+        date_from = datetime.datetime.strptime(f'{day_from}{month_from}{year_from}', "%d%m%Y").date()
+        date_to = datetime.datetime.strptime(f'{day_to}{month_to}{year_to}', "%d%m%Y").date()
+
+        if date_from >= date_to:
+            raise IncorrectDateError('Указан некорректный диапазон дат.')
+
+        return day_from, month_from, year_from, day_to, month_to, year_to

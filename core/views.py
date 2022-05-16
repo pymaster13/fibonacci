@@ -127,32 +127,19 @@ class FillUserReserveView(GenericAPIView):
             coin, _ = Coin.objects.get_or_create(name='BUSD', network='BEP20')
             amount = Decimal(serializer.validated_data['amount'])
 
-            print(1)
-
             transaction = Transaction.objects.create(
                 address_from=wallet_address_from,
                 address_to=admin_wallet.wallet_address,
                 coin=coin,
-                amount=amount
+                amount=amount,
+                fill_up=True
                 )
-
-            print(2)
-
-            a = user.balance
-            print(a)
-            print(type(a))
-
-            b = transaction.amount
-            print(b)
-            print(type(b))
 
             user.balance += transaction.amount
             user.save()
-            print(3)
 
 
             admin_wallet.balance += transaction.amount
-            print(2)
             admin_wallet.save()
 
             return Response({'status': 'success'})
@@ -218,13 +205,21 @@ class TakeOffUserReserveView(GenericAPIView):
                 address_from=admin_wallet.wallet_address,
                 address_to=wallet_address_to,
                 coin=coin,
-                amount=amount,
-                commission=commission
+                amount=amount-commission,
+                received=True
                 )
 
-            user.balance = user.balance - transaction.amount - transaction.commission
+            transaction2 = Transaction.objects.create(
+                address_from=user_metamask.wallet_address,
+                address_to=admin_wallet.wallet_address,
+                coin=coin,
+                amount=commission,
+                commission=True
+                )
+
+            user.balance = user.balance - transaction.amount - transaction2.amount
             user.save()
-            admin_wallet.balance = admin_wallet.balance - transaction.amount + transaction.commission
+            admin_wallet.balance = admin_wallet.balance - transaction.amount + transaction2.amount
             admin_wallet.save()
 
             return Response({'status': 'success'})
@@ -315,13 +310,21 @@ class TakeOffUserReferalsView(GenericAPIView):
                 address_from=admin_wallet.wallet_address,
                 address_to=wallet_address_to,
                 coin=coin,
-                amount=amount,
-                commission=commission
+                amount=amount-commission,
+                received=True
                 )
 
-            user.referal_balance = user.referal_balance - transaction.amount - transaction.commission
+            transaction2 = Transaction.objects.create(
+                address_from=wallet_address_to,
+                address_to=admin_wallet.wallet_address,
+                coin=coin,
+                amount=commission,
+                commission=True
+                )
+
+            user.referal_balance = user.referal_balance - transaction.amount - transaction2.amount
             user.save()
-            admin_wallet.balance = admin_wallet.balance - transaction.amount + transaction.commission
+            admin_wallet.balance = admin_wallet.balance - transaction.amount + transaction2.amount
             admin_wallet.save()
 
             return Response({'status': 'success'})
@@ -332,8 +335,8 @@ class TakeOffUserReferalsView(GenericAPIView):
                             status=HTTP_400_BAD_REQUEST)
 
 
-class TakeOffIDOTokensView(GenericAPIView):
-    """API endpoint for takeoff IDO user tokens from admin wallet."""
+class TryTakeOffIDOTokensView(GenericAPIView):
+    """API endpoint for try takeoff IDO user tokens from admin wallet."""
 
     serializer_class = CustomTokenSerializer
     permission_classes = (IsAuthenticated,)
@@ -342,8 +345,14 @@ class TakeOffIDOTokensView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         coin_name = serializer.validated_data['coin']
-        coin = Coin.objects.get(name=coin_name)
-        print(coin)
+        if coin_name == 'BUSD':
+            return Response({"error": "BUSD нельзя снять данным образом."},
+                            status=HTTP_400_BAD_REQUEST)
+        try:
+            coin = Coin.objects.get(name=coin_name)
+        except Exception:
+            return Response({"error": "Такой монеты не существует."},
+                            status=HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(email=request.user)
             try:
@@ -352,9 +361,9 @@ class TakeOffIDOTokensView(GenericAPIView):
                 return Response({"error": "У пользователя не привязан метамаск-кошелек."},
                                 status=HTTP_400_BAD_REQUEST)
             transactions = Transaction.objects.filter(address_to=metamask.wallet_address,
-                                                      coin=coin, received=False)
+                                                      coin=coin,
+                                                      received=False)
             if transactions:
-
                 ido = IDO.objects.get(coin=coin)
                 ido_participant = IDOParticipant.objects.get(user=user, ido=ido)
 
@@ -363,18 +372,11 @@ class TakeOffIDOTokensView(GenericAPIView):
 
                 income_in_busd = sum(trans.amount for trans in transactions) * coin.cost_in_busd
                 income_tokens = sum(trans.amount for trans in transactions)
-                busd = Coin.objects.get(name='BUSD')
 
                 if ido_participant.refund_allocation < 650:
                     if Decimal(ido_participant.refund_allocation) + income_in_busd >= 650:
-                        print(Decimal(ido_participant.refund_allocation))
-                        print(income_in_busd)
                         diff_busd = Decimal(ido_participant.refund_allocation) + income_in_busd - Decimal(650)
-                        print(f'{income_in_busd=}')
-                        print(f'{income_tokens=}')
-                        print(f'{diff_busd=}')
                         diff_tokens = diff_busd / coin.cost_in_busd
-                        print(f'{diff_tokens=}')
 
                         ido_participant.refund_allocation = 650
                         ido_participant.save()
@@ -383,12 +385,7 @@ class TakeOffIDOTokensView(GenericAPIView):
                                                         admin_wallet,
                                                         ido.smartcontract,
                                                         diff_tokens)
-                        print(f'{diff_result=}')
                         tokens_result = income_tokens - diff_tokens + diff_result
-                        print(f'{tokens_result=}')
-                        print(f'{income_tokens=}')
-                        print(f'{diff_tokens=}')
-                        print(f'{diff_result=}')
 
                         Transaction.objects.create(address_from=ido.smartcontract,
                                                    address_to=metamask.wallet_address,
@@ -400,25 +397,13 @@ class TakeOffIDOTokensView(GenericAPIView):
                             trans.visible = False
                             trans.save()
 
-                        return Response({'status': 'fail', 'decription': 'Перерасчет доходов по IDO с учетом реферальной программы'},
-                                        status=HTTP_200_OK)
-
+                        return Response({'error': 'Перерасчет заработка c IDO с учетом реферальной программы.'},
+                                        status=HTTP_400_BAD_REQUEST)
 
                     else:
-                        for trans in transactions:
-                            trans.received = True
-                            trans.save()
-                        admin_wallet.balance -= income_tokens
-                        admin_wallet.save()
-                        ido_participant.refund_allocation += income_busd
-                        ido_participant.save()
                         return Response({'status': 'success'})
 
                 else:
-                    for trans in transactions:
-                        trans.received = True
-                        trans.save()
-                    admin_wallet.balance -= income_tokens
                     return Response({'status': 'success'})
 
             return Response({"error": 'Отсутствуют транзакции.'},
@@ -427,3 +412,65 @@ class TakeOffIDOTokensView(GenericAPIView):
             print(e)
             return Response({"error": 'Ошибка привязки адреса кошелька.'},
                             status=HTTP_400_BAD_REQUEST)
+
+
+
+class TakeOffIDOTokensSuccessView(GenericAPIView):
+    """API endpoint if takeoff IDO user tokens from admin wallet is success."""
+
+    serializer_class = CustomTokenSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        coin_name = serializer.validated_data['coin']
+        if coin_name == 'BUSD':
+            return Response({"error": "BUSD нельзя снять данным образом."},
+                            status=HTTP_400_BAD_REQUEST)
+        try:
+            coin = Coin.objects.get(name=coin_name)
+        except Exception:
+            return Response({"error": "Такой монеты не существует."},
+                            status=HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=request.user)
+            try:
+                metamask = MetamaskWallet.objects.get(user=user)
+            except Exception as e:
+                return Response({"error": "У пользователя не привязан метамаск-кошелек."},
+                                status=HTTP_400_BAD_REQUEST)
+            transactions = Transaction.objects.filter(address_to=metamask.wallet_address,
+                                                      coin=coin,
+                                                      received=False)
+            if transactions:
+                ido = IDO.objects.get(coin=coin)
+                ido_participant = IDOParticipant.objects.get(user=user, ido=ido)
+
+                admin_address = Address.objects.get(coin=coin, owner_admin=True)
+                admin_wallet = AdminWallet.objects.get(wallet_address=admin_address)
+
+                income_in_busd = sum(trans.amount for trans in transactions) * coin.cost_in_busd
+                income_tokens = sum(trans.amount for trans in transactions)
+
+                for trans in transactions:
+                    trans.received = True
+                    trans.save()
+
+                ido_participant.refund_allocation += float(income_in_busd)
+                if ido_participant.refund_allocation > 650:
+                    ido_participant.refund_allocation = 650
+                ido_participant.save()
+
+                admin_wallet.balance -= income_tokens
+                admin_wallet.save()
+
+                return Response({'status': 'success'})
+
+            return Response({"error": 'Отсутствуют транзакции.'},
+                            status=HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({"error": 'Ошибка привязки адреса кошелька.'},
+                            status=HTTP_400_BAD_REQUEST)
+

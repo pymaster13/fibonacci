@@ -18,7 +18,7 @@
 							"formdata": [
 								{
 									"key": "tg_nickname",
-									"value": "12",
+									"value": "55",
 									"type": "text"
 								}
 							]
@@ -50,12 +50,12 @@
 							"formdata": [
 								{
 									"key": "tg_nickname",
-									"value": "12",
+									"value": "55",
 									"type": "text"
 								},
 								{
 									"key": "code",
-									"value": "242218",
+									"value": "604731",
 									"type": "text"
 								}
 							]
@@ -87,12 +87,12 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "12@ya.ru",
+									"value": "55@ya.ru",
 									"type": "text"
 								},
 								{
 									"key": "tg_nickname",
-									"value": "12",
+									"value": "55",
 									"type": "text"
 								},
 								{
@@ -112,7 +112,7 @@
 								},
 								{
 									"key": "inviter",
-									"value": "dd94ff46-bb57-4f45-b81b-b36c503469c5",
+									"value": "\t4407be24-fb5e-4e65-b699-ca806e450570",
 									"type": "text"
 								}
 							]
@@ -144,7 +144,7 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "321@ya.ru",
+									"value": "55@ya.ru",
 									"type": "text"
 								},
 								{
@@ -794,7 +794,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
 								"type": "text"
 							},
 							{
@@ -809,7 +809,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "localhost:8000/api/v1/ido/delete/3/",
+							"raw": "localhost:8000/api/v1/ido/delete/50/",
 							"host": [
 								"localhost"
 							],
@@ -819,7 +819,7 @@
 								"v1",
 								"ido",
 								"delete",
-								"3",
+								"50",
 								""
 							]
 						}
@@ -833,7 +833,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
 								"type": "text"
 							},
 							{
@@ -844,109 +844,13 @@
 							}
 						],
 						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "IDO2321",
-									"type": "text"
-								},
-								{
-									"key": "description",
-									"value": "Desc44",
-									"type": "text"
-								},
-								{
-									"key": "general_allocation",
-									"value": "3500000",
-									"type": "text"
-								},
-								{
-									"key": "person_allocation",
-									"value": "123",
-									"type": "text"
-								},
-								{
-									"key": "buy_date",
-									"value": "2000-01-01",
-									"type": "text"
-								},
-								{
-									"key": "tge",
-									"value": "2000-01-02",
-									"type": "text"
-								},
-								{
-									"key": "vesting",
-									"value": "2000-01-03",
-									"type": "text"
-								},
-								{
-									"key": "coin",
-									"value": "FVC",
-									"type": "text"
-								},
-								{
-									"key": "coin_network",
-									"value": "BOP32",
-									"type": "text"
-								},
-								{
-									"key": "commission",
-									"value": "2",
-									"type": "text"
-								},
-								{
-									"key": "image",
-									"type": "file",
-									"src": "gtGluCQnJ/Снимок экрана от 2021-07-03 21-37-05.png"
-								},
-								{
-									"key": "smartcontract",
-									"value": "fksaofksaopfksapofkopsakfaslmflkasfmlksaf211323",
-									"type": "text"
-								},
-								{
-									"key": "exchange",
-									"value": "Binance",
-									"type": "text"
-								},
-								{
-									"key": "telegram_acc",
-									"value": "https:/.//",
-									"type": "text"
-								},
-								{
-									"key": "twitter_acc",
-									"value": "https:/.//2121",
-									"type": "text"
-								},
-								{
-									"key": "discord_acc",
-									"value": "https:/.//21213",
-									"type": "text"
-								},
-								{
-									"key": "site",
-									"value": "https:/.//1312124124",
-									"type": "text"
-								},
-								{
-									"key": "white_paper",
-									"value": "https:/.//2",
-									"type": "text"
-								},
-								{
-									"key": "without_pay",
-									"value": "True",
-									"type": "text"
-								},
-								{
-									"key": "charge_manually",
-									"value": "True",
-									"type": "text"
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"IDO_1\",\n    \"description\": \"IDO_1\",\n    \"general_allocation\": 1000,\n    \"person_allocation\": 500,\n    \"buy_date\": \"2000-01-01\",\n    \"tge\": \"2000-01-02\",\n    \"vesting\": \"2000-01-03\",\n    \"coin\": \"qq1\",\n    \"coin_network\": \"qq1\",\n    \"commission\": 2,\n    \"smartcontract\": \"\",\n    \"exchange\": \"Binance\",\n    \"without_pay\": false,\n    \"charge_manually\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
 								}
-							]
+							}
 						},
 						"url": {
 							"raw": "localhost:8000/api/v1/ido/create/",
@@ -972,123 +876,27 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 144bd2429058f2cfff259c8f3a8ed8d48cf64ec2f7a31c77aaa6855617285db5",
 								"type": "text"
 							},
 							{
 								"key": "Authorization",
-								"value": "Token 6b0666e27978da23b5adf97034152bf62575c65373f3ac6ccff5b97231252fac",
+								"value": "Token 217c2a5c64ab9e9894e3c738424e3d18b3155adca49b20da3dc95030ca9690ea",
 								"type": "text",
 								"disabled": true
 							}
 						],
 						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "IDO22233123123",
-									"type": "text"
-								},
-								{
-									"key": "description",
-									"value": "Desc44312312",
-									"type": "text"
-								},
-								{
-									"key": "general_allocation",
-									"value": "3500000",
-									"type": "text"
-								},
-								{
-									"key": "person_allocation",
-									"value": "123",
-									"type": "text"
-								},
-								{
-									"key": "buy_date",
-									"value": "2000-01-01",
-									"type": "text"
-								},
-								{
-									"key": "tge",
-									"value": "2000-01-02",
-									"type": "text"
-								},
-								{
-									"key": "vesting",
-									"value": "2000-01-03",
-									"type": "text"
-								},
-								{
-									"key": "coin",
-									"value": "FVC",
-									"type": "text"
-								},
-								{
-									"key": "coin_network",
-									"value": "BOP32",
-									"type": "text"
-								},
-								{
-									"key": "commission",
-									"value": "2",
-									"type": "text"
-								},
-								{
-									"key": "image",
-									"type": "file",
-									"src": "1I-INCytV/Снимок экрана от 2021-04-21 21-37-51.png"
-								},
-								{
-									"key": "smartcontract",
-									"value": "fksaofksaopfksapofkopsakfaslmflkasfmlksaf",
-									"type": "text"
-								},
-								{
-									"key": "exchange",
-									"value": "Binance",
-									"type": "text"
-								},
-								{
-									"key": "telegram_acc",
-									"value": "https:/.//",
-									"type": "text"
-								},
-								{
-									"key": "twitter_acc",
-									"value": "https:/.//2121",
-									"type": "text"
-								},
-								{
-									"key": "discord_acc",
-									"value": "https:/.//21213",
-									"type": "text"
-								},
-								{
-									"key": "site",
-									"value": "https:/.//1312124124",
-									"type": "text"
-								},
-								{
-									"key": "white_paper",
-									"value": "https:/.//2",
-									"type": "text"
-								},
-								{
-									"key": "without_pay",
-									"value": "True",
-									"type": "text"
-								},
-								{
-									"key": "charge_manually",
-									"value": "True",
-									"type": "text"
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"IDO_1\",\n    \"description\": \"IDO_1\",\n    \"general_allocation\": 1000,\n    \"person_allocation\": 500,\n    \"buy_date\": \"2000-01-01\",\n    \"tge\": \"2000-01-02\",\n    \"vesting\": \"2000-01-03\",\n    \"coin\": \"BO111\",\n    \"coin_network\": \"BOP2111\",\n    \"commission\": 2,\n    \"smartcontract\": \"\",\n    \"exchange\": \"Binance\",\n    \"without_pay\": true,\n    \"charge_manually\": false,\n    \"users\": [\"44@ya.ru\"],\n    \"allocations\": [500]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
 								}
-							]
+							}
 						},
 						"url": {
-							"raw": "localhost:8000/api/v1/ido/update/3/",
+							"raw": "localhost:8000/api/v1/ido/update/37/",
 							"host": [
 								"localhost"
 							],
@@ -1098,7 +906,307 @@
 								"v1",
 								"ido",
 								"update",
-								"3",
+								"37",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Participate in IDO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9e626643687903076df198703e570aeed7ebc7bcef2b4b08b888944e97b1a698",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ido",
+									"value": "50",
+									"type": "text"
+								},
+								{
+									"key": "allocation",
+									"value": "12121",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "general_allocation",
+									"value": "3500000",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "person_allocation",
+									"value": "123",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "buy_date",
+									"value": "2000-01-01",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "tge",
+									"value": "2000-01-02",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "vesting",
+									"value": "2000-01-03",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "coin",
+									"value": "FVC2",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "coin_network",
+									"value": "BOP3232",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "commission",
+									"value": "2",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "gtGluCQnJ/Снимок экрана от 2021-07-03 21-37-05.png",
+									"disabled": true
+								},
+								{
+									"key": "smartcontract",
+									"value": "fksaofksaopfksapofkopsakfaslmflkasfmlksaf211323",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "exchange",
+									"value": "Binance",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "telegram_acc",
+									"value": "https:/.//",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "twitter_acc",
+									"value": "https:/.//2121",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "discord_acc",
+									"value": "https:/.//21213",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "site",
+									"value": "https:/.//1312124124",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "white_paper",
+									"value": "https:/.//2",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "without_pay",
+									"value": "True",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "charge_manually",
+									"value": "True",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/participate/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"participate",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Attach user to queue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 9e626643687903076df198703e570aeed7ebc7bcef2b4b08b888944e97b1a698",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ido",
+									"value": "50",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/attach_to_queue/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"attach_to_queue",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Charge tokens manually",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 6b6aff6f962ac223ec53c2d7cda4c11929af51e2f127c8f4ca9ea644290c7e60",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 9abac5da2db83cf2afd6f1d9f8e7780ebaa98cea2990917ded1f89e8d09e4127",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ido",
+									"value": "29",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "1000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/charge_manually/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"charge_manually",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Charge manually refund allocation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 6b6aff6f962ac223ec53c2d7cda4c11929af51e2f127c8f4ca9ea644290c7e60",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 9abac5da2db83cf2afd6f1d9f8e7780ebaa98cea2990917ded1f89e8d09e4127",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "ido",
+									"value": "29",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "200",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/ido/charge_refund_allocation/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"ido",
+								"charge_refund_allocation",
 								""
 							]
 						}
@@ -1108,16 +1216,22 @@
 			]
 		},
 		{
-			"name": "Metamask",
+			"name": "Core",
 			"item": [
 				{
-					"name": "Add metamask wallet",
+					"name": "Bind metamask wallet",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 31e086b0135569a723237d777cff738182cd33762f644b175ff92257480c2cb3",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 762369aee25c709da777c291d15465ce32623bd704a76fc68de085efde8cd3aa",
 								"type": "text"
 							}
 						],
@@ -1126,13 +1240,13 @@
 							"formdata": [
 								{
 									"key": "wallet_address",
-									"value": "31231231231213",
+									"value": "312rqwqwf321321",
 									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "localhost:8000/api/v1/core/add_metamask_wallet/",
+							"raw": "localhost:8000/api/v1/core/set_metamask/",
 							"host": [
 								"localhost"
 							],
@@ -1141,7 +1255,7 @@
 								"api",
 								"v1",
 								"core",
-								"add_metamask_wallet",
+								"set_metamask",
 								""
 							]
 						}
@@ -1155,7 +1269,48 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token cde16b46612942beed2d050ea153a557217cec06f06e207fba79107927fb1557",
+								"value": "Token 45eccdf2478e71f2c7ba2ab7ef8696830cd6e71ba65ec2cfd386bcc4afb83faf",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "wallet_address",
+									"value": "312312312312133213",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/set_metamask/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"set_metamask",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve admin wallet address",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 6012b2b0072c8cc4587524eef6503ef163d34f1f9cd4179c1e183a982b381453",
 								"type": "text"
 							}
 						],
@@ -1170,7 +1325,7 @@
 							]
 						},
 						"url": {
-							"raw": "localhost:8000/api/v1/core/add_metamask_wallet/",
+							"raw": "localhost:8000/api/v1/core/retrieve_admin_wallet/",
 							"host": [
 								"localhost"
 							],
@@ -1179,7 +1334,702 @@
 								"api",
 								"v1",
 								"core",
-								"add_metamask_wallet",
+								"retrieve_admin_wallet",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fill user reserve",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9e626643687903076df198703e570aeed7ebc7bcef2b4b08b888944e97b1a698",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "10000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/fill_user_reserve/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"fill_user_reserve",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fill user reserve by referals",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 8248a109e7668788777efcb58fb37f22e3559c17087435b67fe3c9679011b0b5",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "26",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/fill_user_reserve_by_referal/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"fill_user_reserve_by_referal",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Take off user reserve",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 9e626643687903076df198703e570aeed7ebc7bcef2b4b08b888944e97b1a698",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "100",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/takeoff_user_reserve/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"takeoff_user_reserve",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Takeoff user referals reserve",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 8248a109e7668788777efcb58fb37f22e3559c17087435b67fe3c9679011b0b5",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "124",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/takeoff_referals/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"takeoff_referals",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Takeoff user IDO tokens TRY",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 7d3bda19e1621eedaf759a7a9fe5d6fa8d8fbea2f20e3d12df10f91f92340619",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "coin",
+									"value": "BOR",
+									"type": "text"
+								},
+								{
+									"key": "",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/takeoff_ido_tokens_try/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"takeoff_ido_tokens_try",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Takeoff user IDO tokens SUCCESS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 7d3bda19e1621eedaf759a7a9fe5d6fa8d8fbea2f20e3d12df10f91f92340619",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Token c9843a5196c0edc64a95e1b9000b40076353a0205d552569102cbb4ecc707c61",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "coin",
+									"value": "BOR",
+									"type": "text"
+								},
+								{
+									"key": "",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/core/takeoff_ido_tokens_success/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"core",
+								"takeoff_ido_tokens_success",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Retrieve user permissions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 7455bf6ad2c85f3d3ce7c45a4a3576f061ff55370da65af80dea2c92027deead",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/retrieve_permissions/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"retrieve_permissions",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user idos",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ab7bd22e4e2dbf82a1221294217570c3633832d353ff0dea0eea3ded345abb21",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/idos/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"idos",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user Stats ido",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 7d3bda19e1621eedaf759a7a9fe5d6fa8d8fbea2f20e3d12df10f91f92340619",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "coin",
+									"value": "FVC2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/stats/idos/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"stats",
+								"idos",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user Stats partners",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/stats/partners/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"stats",
+								"partners",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user Stats referals",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 88d9b37b65db68408a5b96ab679fbd78ccff3c6f23e13472797d53f7b75dbd56",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "1396b03287844a525088bafd80b8bf5353cdcba892425e267fb8859663682a77",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/stats/referal_charges/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"stats",
+								"referal_charges",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 5a59c2155241f57d51e3238034011cf29c4597469770b62feb83131ac93e4cb5",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/info/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"info",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user partners",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 5a59c2155241f57d51e3238034011cf29c4597469770b62feb83131ac93e4cb5",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/retrieve_partners/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"retrieve_partners",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user partners by email",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 5a59c2155241f57d51e3238034011cf29c4597469770b62feb83131ac93e4cb5",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/account/retrieve_partners_by_email/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"retrieve_partners_by_email",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 8248a109e7668788777efcb58fb37f22e3559c17087435b67fe3c9679011b0b5",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/account/dashboard/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"dashboard",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard Referal Table",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token ca41dba6433a5b3936a2d9d5e652a547535b24969989b442d372b0abf01234e4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8000/api/v1/account/idos/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"idos",
 								""
 							]
 						}
@@ -1211,7 +2061,7 @@
 								},
 								{
 									"key": "code",
-									"value": "716378",
+									"value": "446856\n",
 									"type": "text"
 								},
 								{
@@ -1258,7 +2108,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token ed3ac00f346cb0a1f339698a9ccccc0381a7d6d572c4605bd38ab442c223321f",
+								"value": "Token a32edcec344ac8f21477ec84665eebd5be60882c8ba82c55eee825191898d3b5",
 								"type": "text"
 							},
 							{
@@ -1270,7 +2120,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"email\": \"321@ya.ru\", \"permissions\": [\"ido\", \"transaction\", \"user\", \"news\", \"statistics\", \"admin\"]}",
+							"raw": "{\n    \"email\": \"44@ya.ru\",\n    \"permissions\": [\"ido\", \"transaction\", \"user\", \"news\", \"statistics\", \"admin\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1295,13 +2145,63 @@
 					"response": []
 				},
 				{
+					"name": "Set user queue place",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 1c4ddea65a40d63849a16a70059961533c9dacbc49eba092c59fd82e3db24443",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/set_user_queue/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"set_user_queue",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Add vip user",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token bd9c418ede9f0c1e4a24de61018ae51b68bf912721d7acaac9f86d6b86445c66",
+								"value": "Token 9abac5da2db83cf2afd6f1d9f8e7780ebaa98cea2990917ded1f89e8d09e4127",
 								"type": "text"
 							},
 							{
@@ -1321,7 +2221,7 @@
 								},
 								{
 									"key": "profit",
-									"value": "223",
+									"value": "11",
 									"type": "text"
 								}
 							]
@@ -1474,14 +2374,9 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "User",
-			"item": [
+				},
 				{
-					"name": "Retrieve user permissions",
+					"name": "Retrieve users info",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1490,7 +2385,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Token c0d258705844f6cc3ae8d17d147f3910311b434b905297cafb40eea9d254e0fe",
+								"value": "Token e7a93b8f1e2ced90969bbe36223a8dad27db3f947010bc4ebaf419d53ee00869",
 								"type": "text"
 							},
 							{
@@ -1501,16 +2396,17 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
 								}
-							}
+							]
 						},
 						"url": {
-							"raw": "localhost:8000/api/v1/account/retrieve_permissions/",
+							"raw": "localhost:8000/api/v1/admin/retrieve_users_info/",
 							"host": [
 								"localhost"
 							],
@@ -1518,8 +2414,302 @@
 							"path": [
 								"api",
 								"v1",
-								"account",
-								"retrieve_permissions",
+								"admin",
+								"retrieve_users_info",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statistics",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/stats/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"stats",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statistics by day",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "date_in_str",
+									"value": "15-05-2022",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/stats_by_day/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"stats_by_day",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statistics by range days",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "date_in_str_from",
+									"value": "15-05-2022",
+									"type": "text"
+								},
+								{
+									"key": "date_in_str_to",
+									"value": "16-05-2022",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/stats_by_range_days/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"stats_by_range_days",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statistics by range days Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 53513aaf8b9aeefdc361553d547f7b7f1e8ac1ad3aa08a8735611d003efd0107",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "44@ya.ru",
+									"type": "text"
+								},
+								{
+									"key": "date_in_str_to",
+									"value": "16-05-2022",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/stats_user_by_click/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"stats_user_by_click",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve users info Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token e7a93b8f1e2ced90969bbe36223a8dad27db3f947010bc4ebaf419d53ee00869",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "666@yandex.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/create_wallet/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"create_wallet",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add admin wallet with custom tokens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token 144bd2429058f2cfff259c8f3a8ed8d48cf64ec2f7a31c77aaa6855617285db5",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 217c2a5c64ab9e9894e3c738424e3d18b3155adca49b20da3dc95030ca9690ea",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "smartcontract",
+									"value": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+									"type": "text"
+								},
+								{
+									"key": "wallet_address",
+									"value": "0x4e83362442b8d1bec281594cea3050c8eb01311c",
+									"type": "text"
+								},
+								{
+									"key": "decimal",
+									"value": "18",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8000/api/v1/admin/create_wallet/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"create_wallet",
 								""
 							]
 						}

@@ -47,15 +47,11 @@ def grant_permissions(user, perms):
 def refresh_queue_places(user):
     """Help function to refresh all queues places
        during set him place by admin"""
-    print('user', user)
     queues = QueueUser.objects.filter(user=user)
-    print(queues)
     if queues:
         for queue in queues:
-            print('queue', queue)
             if not user.permanent_place:
                 if queue.permanent and queue.is_active:
-                    print('reset')
                     queue.permanent = False
                     ido = queue.ido
 
@@ -63,8 +59,6 @@ def refresh_queue_places(user):
                     low_queues = QueueUser.objects.filter(
                                     ido=ido,
                                     number__gt=queue.number)
-                    print(low_queues)
-
                     for q in low_queues:
                         if q.permanent or q.date < queue.date:
                             q.number -= 1
@@ -80,17 +74,13 @@ def refresh_queue_places(user):
                         queue.number = new_number
                     else:
                         all_queues = QueueUser.objects.filter(ido=ido)
-                        print('all', all_queues)
                         if len(all_queues) > 1:
-                            print('len > 1')
                             new_number = all_queues.aggregate(Max('number'))
-                            print(new_number)
                             queue.number = new_number['number__max'] + 1
 
                     queue.save()
             else:
                 if not queue.permanent and queue.is_active:
-                    print('new')
                     queue.permanent = True
                     queue.number = user.permanent_place
                     ido = queue.ido

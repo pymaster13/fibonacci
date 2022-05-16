@@ -38,8 +38,6 @@ Run dramatiq workers - "python3 manage.py rundramatiq"
 def scan_admin_wallets():
     """Regular task for scanning admin_wallets"""
 
-    print('FUCK')
-
     admin_wallets = get_custom_admin_wallets()
 
     for wallet in admin_wallets:
